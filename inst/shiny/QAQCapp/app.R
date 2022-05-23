@@ -56,10 +56,20 @@ ui <- fluidPage(
                ),
   
     mainPanel(width = 10,
-    DT::DTOutput('data.table1') %>% shinycssloaders::withSpinner(color="#0dc5c1", size = 1.5, type = 3, color.background = "white")
-  )
+
+              tabsetPanel(type = "tabs",
+                          tabPanel("rec data",
+                                   DT::DTOutput('data.table1') %>%
+                                     shinycssloaders::withSpinner(color="#0dc5c1", size = 1.5, type = 3, color.background = "white")),
+                          tabPanel("sync diff", verbatimTextOutput("clk"))
+                          )
+              )
   )
 )
+
+              
+  
+
 
 
 ##--------------------server-----------------------
@@ -109,6 +119,16 @@ output$data.table1 <- DT::renderDT({QAQC(foo())}, escape = FALSE, server = FALSE
             write.csv(foo(), file)
     }
   )
+
+  # clock comparison
+  clk <- reactive({
+    time_compare()
+  })
+  
+  
+  output$clk <- renderPrint({clk()$tsync})
+    
+  
 }
 
 shinyApp(ui, server)
