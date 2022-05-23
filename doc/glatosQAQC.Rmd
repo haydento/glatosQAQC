@@ -1,0 +1,72 @@
+---
+title: "glatosQAQC"
+author: "Todd Hayden"
+date: "` r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{glatosQAQC}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(glatosQAQC)
+```
+
+# How to use the glatosQAQC package to summarize Vemco receiver data
+files (*.vrl)
+
+Vemco vrl files are a proprietary file format that contains data from
+acoustic tag detections.  In addition to tag detections, the VRL file
+also contains data about receiver operating settings, receiver battery
+condition, errors associated with the receiver, time correction
+information, review available receiver memory, and many other
+settings.  Verifing the integrety of vrl files is an important step to
+make sure files are not corrupt and prevent loss of data.
+
+The glatosQAQC package provides a single R function that allows the
+user to interactively select vrl files for inclusion in the report.
+After vrl files are chosen, the function opens each vrl, extracts
+critical metrics from the file and creates a table that contains
+information for each receiver.  The generated report is output as an
+HTML file and csv file that may be opened in any web browser or
+spreadsheet software.
+
+The function performs several basic checks of the data to identify
+potential errors or problems.  If any of these checks fail, the column
+associated with the error is highlighted in red.  Report also includes
+information about time synchronization of computer clock and receiver
+clock.  Synchonization of computer clock is checked by comparing
+network time local computer time.  Table below describes information
+in report.
+
+*(table- data dictionary needed here)
+
+
+*(table of checks performed are needed here!!)* 
+The report is created by running the \code{make_report} function.
+This function allows the user to identify the user directory and file
+name of output files.  Basic use of function is outlined below:
+
+\code{
+
+library(glatosQAQC)
+
+make_report(output_dir = "~/Desktop", output_file = "my_report.html")
+ 
+ }
+
+
+
+
+
+
+
+
