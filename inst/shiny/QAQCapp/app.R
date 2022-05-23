@@ -61,15 +61,13 @@ ui <- fluidPage(
                           tabPanel("rec data",
                                    DT::DTOutput('data.table1') %>%
                                      shinycssloaders::withSpinner(color="#0dc5c1", size = 1.5, type = 3, color.background = "white")),
-                          tabPanel("sync diff", verbatimTextOutput("clk"))
+                          tabPanel("computer time sync",
+                                   DT::DTOutput('clk') %>%
+                                     shinycssloaders::withSpinner(color = "#0dc5c1", size = 1.5, type = 3, color.background = "white"), width = "50%", height = "50%")
                           )
               )
   )
 )
-
-              
-  
-
 
 
 ##--------------------server-----------------------
@@ -126,9 +124,7 @@ output$data.table1 <- DT::renderDT({QAQC(foo())}, escape = FALSE, server = FALSE
   })
   
   
-  output$clk <- renderPrint({clk()$tsync})
-    
-  
+  output$clk <- DT::renderDT({clk()}, escape = FALSE, server = FALSE)
 }
 
 shinyApp(ui, server)
