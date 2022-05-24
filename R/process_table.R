@@ -8,13 +8,10 @@
 # if don't want to interactively choose files (for dev)
   ## fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
 
-## fls <- c("C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl", "C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_547608_20190820_1.vrl")
-
-## fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2W_109420_20190619_1.vrl", "C:/Users/thayden/Documents/VR2W_109412_20190619_1.vrl")
-
-##  mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
-## work_dir = "C:/Users/thayden/Desktop"
-## nme <- "VR2AR_547537_20210528_1.vrl" 
+##  fls <- c("C:/Users/thayden/Documents/error_vrl/VR2AR_546314_20210528_1.vrl", "C:/Users/thayden/Documents/error_vrl/VR2AR_547540_20210528_1.vrl")
+##   mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+##  work_dir = "C:/Users/thayden/Desktop"
+## nme <- c("VR2AR_546314_20210528_1.vrl", "VR2AR_547540_20210528_1.vrl")
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
@@ -209,26 +206,26 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
              ]   
 
   # enforce data output types
-  ## out[, `:=` (`rec num` = as.numeric(`rec num`),
-  ##             `rec mod` = as.character(`rec mod`),
-  ##             `rec firmware` = as.character(`rec firmware`),
-  ##             `rec map` = as.character(`rec map`),
-  ##             `mem avail` = as.numeric(`mem avail`),
-  ##             `rec init` = as.POSIXct(`rec init`, tz = "UTC"),
-  ##             `rec download` = as.POSIXct(`rec download`, tz = "UTC"),
-  ##             `comp download` = as.POSIXct(`comp download`, tz = "UTC"),
-  ##             `first det` = as.POSIXct(`first det`, tz = "UTC"),
-  ##             `last det` = as.POSIXct(`last det`, tz = "UTC"),
-  ##             `num det` = as.numeric(`num det`),
-  ##             `rel bat_V` = as.numeric(`rel bat_V`),
-  ##             `rec bat_V` = as.numeric(`rec bat_V`),
-  ##             `int tag init` = as.POSIXct(`int tag init`, tz = "UTC"),
-  ##             `int tag ID` = as.character(`int tag ID`),
-  ##             `int tag power` = as.character(`int tag power`),
-  ##             `int tag min delay` = as.character(`int tag min delay`),
-  ##             `int tag max delay` = as.character(`int tag max delay`)      
-  ##             )
-  ##             ]
+  out[, `:=` (`rec num` = as.numeric(`rec num`),
+              `rec mod` = as.character(`rec mod`),
+              `rec firmware` = as.character(`rec firmware`),
+              `rec map` = as.character(`rec map`),
+              `mem avail` = as.numeric(`mem avail`),
+              `rec init` = as.POSIXct(`rec init`, tz = "UTC"),
+              `rec download` = as.POSIXct(`rec download`, tz = "UTC"),
+              `comp download` = as.POSIXct(`comp download`, tz = "UTC"),
+              `first det` = as.POSIXct(`first det`, tz = "UTC"),
+              `last det` = as.POSIXct(`last det`, tz = "UTC"),
+              `num det` = as.numeric(`num det`),
+              `rel bat_V` = as.numeric(`rel bat_V`),
+              `rec bat_V` = as.numeric(`rec bat_V`),
+              `int tag init` = as.POSIXct(`int tag init`, tz = "UTC"),
+              `int tag ID` = as.character(`int tag ID`),
+              `int tag power` = as.character(`int tag power`),
+              `int tag min delay` = as.character(`int tag min delay`),
+              `int tag max delay` = as.character(`int tag max delay`)      
+              )
+              ]
 
     # add in file name info to output table
   out[, file := as.character(nme)]
