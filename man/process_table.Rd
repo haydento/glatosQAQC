@@ -4,7 +4,7 @@
 \alias{process_table}
 \title{Compiles data from all receivers, generates table of data included in report.}
 \usage{
-process_table(fls, mrk_params, nme, work_dir = work_dir)
+process_table(fls, mrk_params, nme, action, work_dir = work_dir)
 }
 \arguments{
 \item{fls}{a character vector of files to include in report}

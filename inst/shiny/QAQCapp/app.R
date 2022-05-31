@@ -44,6 +44,9 @@ if(!is.null(vdat_call)){
     vdat_call <-  normalizePath(vdat_call)
 }
 
+
+# Shiny #
+########################################################################
 # start shiny app
 ui <- fluidPage(
 
@@ -52,8 +55,14 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(width = 2,
                  fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = ".vrl"),
-                 downloadButton("downloadData", "Download")  
-               ),
+                 downloadButton("downloadData", "Download"),
+                 radioButtons(
+                   inputId = "dtype",
+                   label = "action:",
+                   choices = list("Download" = "down",
+                                  "Initialize" = "init"),
+                   inline = TRUE)
+                 ),
   
     mainPanel(width = 10,
 
@@ -83,19 +92,22 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
 
+  
   # kill R session when browser or tab are closed. 
   session$onSessionEnded(stopApp)
 
   df_all <- reactiveVal(NULL)
 
+ 
 #output$data.table1 <- DT::renderDT({
   foo <-reactive({
+    tst <- isolate(input$dtype)
     req(input$file1)
     olddf <- isolate(df_all())
     if(is.null(input$file1)) return(NULL)
 #    print(glimpse(input$file1$datapath))
 #    print(glimpse(input$file1$name))
-    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1$name, mrk_params = vdat_call, work_dir = tempdir())
+    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1$name, action = tst, mrk_params = vdat_call, work_dir = tempdir())
 
  #   print(glimpse(olddf))
  #   print(glimpse(df))
@@ -104,7 +116,7 @@ server <- function(input, output, session) {
     return(df)
   })
   
-output$data.table1 <- DT::renderDT({QAQC(foo())}, escape = FALSE, server = FALSE)
+  output$data.table1 <- DT::renderDT({QAQC(foo())}, escape = FALSE, server = FALSE)
 
 
   

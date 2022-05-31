@@ -17,7 +17,7 @@
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
 # https://stackoverflow.com/questions/52385295/get-the-name-of-an-uploaded-file-in-shiny
 
-process_table <- function(fls, mrk_params, nme, work_dir = work_dir){
+process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   
   # convert vrls to csv format
   dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params, temp_dir = work_dir)
@@ -227,8 +227,14 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
               )
               ]
 
-    # add in file name info to output table
+  # add in file name info to output table
   out[, file := as.character(nme)]
+  
+  # add in action type
+  if (action == "down"){
+    out[, action := "download"]}
+  if (action == "init"){
+      out[, action := "initialize"]}
 
   return(out)
 }
