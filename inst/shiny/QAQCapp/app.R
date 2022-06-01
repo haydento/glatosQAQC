@@ -54,14 +54,15 @@ ui <- fluidPage(
   titlePanel("Receiver QAQC"),
   sidebarLayout(
     sidebarPanel(width = 2,
-                 fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = ".vrl"),
-                 downloadButton("downloadData", "Download"),
                  radioButtons(
                    inputId = "dtype",
                    label = "action:",
                    choices = list("Download" = "down",
                                   "Initialize" = "init"),
-                   inline = TRUE)
+                   inline = TRUE),                 
+                 fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = ".vrl"),
+                 downloadButton("downloadData", "Download")
+                 
                  ),
   
     mainPanel(width = 10,
