@@ -8,10 +8,11 @@
 # if don't want to interactively choose files (for dev)
   ## fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
 
-##  fls <- c("C:/Users/thayden/Documents/error_vrl/VR2AR_546314_20210528_1.vrl", "C:/Users/thayden/Documents/error_vrl/VR2AR_547540_20210528_1.vrl")
-##   mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
+##  mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
 ##  work_dir = "C:/Users/thayden/Desktop"
-## nme <- c("VR2AR_546314_20210528_1.vrl", "VR2AR_547540_20210528_1.vrl")
+##  nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
+##  action <- "down"
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
@@ -46,7 +47,7 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
     req_cols <- c("file", "PRIMARY", "MOTOR")
   col_difs <- setdiff(req_cols, names(bat))
   if(length(col_difs) > 0){
-    bat[, (col_difs) := NA_integer_]
+    bat[, (col_difs) := NA_real_]
   }
   
   # combine
@@ -64,17 +65,15 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
 
   ###### clock ref table
   new_event_offload <- glatosQAQC::extract_records(vdat = dtc, type = "CLOCK_REF")
-
   new_rec_init_down <- data.table::dcast(new_event_offload, file ~ Source, value.var = c("Device Time (UTC)"))
 
   # nothing is written to vdat file if initialization or offload is messed up.  This makes sure that table contains both "offload" and "initialization" columns.
   req_cols <- c("file", "OFFLOAD", "INITIALIZATION")
   col_difs <- setdiff(req_cols, names(new_rec_init_down))
   if(length(col_difs) > 0){
-    new_rec_init_down[, (col_difs) := NA_integer_]
+    # problem here...should not be integer type...
+    new_rec_init_down[, (col_difs) := as.POSIXct(NA, tz = "UTC")]
   }
-
-  data.table::setnames(new_rec_init_down, c("INITIALIZATION", "OFFLOAD"), c("rec init", "rec download"))
 
   new_comp_time <- data.table::dcast(new_event_offload[Source == "OFFLOAD",], file ~ Source, value.var = c("External Time (UTC)"))
   data.table::setnames(new_comp_time, "OFFLOAD", "comp download")
@@ -129,23 +128,33 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
   #event <- event[1,]
 #  ark <- event
 
+#  ark_i_tag <- i_tag
+#  ark_event <- event
+  
   event <- alt_init[event, on = "file",]
-  event[,`:=`(start = `rec init`, end = `comp download`)]
+  event[,`:=`(start = `INITIALIZATION`, end = `comp download`)]
   event[is.na(start), start := alt_init]
     
 #######3#######
-  
-  # event <- event[!is.na(start),]
-  setkey(event, file, start, end)
-  setkey(i_tag, file, start, end)
-  tst <- foverlaps(event, i_tag)
-  tst[, duration := as.numeric(lubridate::as.duration(lubridate::intersect(lubridate::interval(start, end), lubridate::interval(i.start, i.end))))]
-  
-  # find maximum for each 
-  tst <- tst[tst[, .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
 
-#  i_tag[`Power Level` == "DISABLED", `:=` (`Min Delay (s)` = NA, `Max Delay (s)` = NA)]
+
+  if(nrow(i_tag) > 0){
+
+    # event <- event[!is.na(start),]
+    setkey(event, file, start, end)
+    setkey(i_tag, file, start, end)
+    tst <- foverlaps(event, i_tag)
+    tst[, duration := as.numeric(lubridate::as.duration(lubridate::intersect(lubridate::interval(start, end), lubridate::interval(i.start, i.end))))]
+    
+    # find maximum for each 
+    tst <- tst[tst[, .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
+
+    #  i_tag[`Power Level` == "DISABLED", `:=` (`Min Delay (s)` = NA, `Max Delay (s)` = NA)]
+  } else {
+
+    tst <- data.table( file = NA_character_, Time = as.POSIXct(NA, tz = "UTC"), `Power Level` = NA_character_, `Min Delay (s)` = NA_integer_, `Max Delay (s)` = NA_integer_, `Full ID` = NA_character_)}
   
+
   # combine objects
   out <- merge(out, tst, by = "file", all.x = TRUE)
   
@@ -161,7 +170,9 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                               "Power Level",
                               "Min Delay (s)",
                               "Max Delay (s)",
-                              "Map ID"
+                              "Map ID",
+                              "INITIALIZATION",
+                              "OFFLOAD"
                               ),
                        c("first det",
                          "last det",
@@ -174,7 +185,9 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                          "int tag power",
                          "int tag min delay",
                          "int tag max delay",
-                         "rec map"))
+                         "rec map",
+                         "rec init",
+                         "rec download"))
 
   # round memory available column to 1 digit
   out[, "mem avail" := round(out$'mem avail', 1)]
