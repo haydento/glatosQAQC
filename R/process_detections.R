@@ -53,23 +53,12 @@
 
 
 
-process_detections <- function(input, battery = FALSE){
+process_detections <- function(input){
 
+  stopifnot(all(class(input) %in% c("vdat_dtc", "data.table", "data.frame")))
+  
   dtc <- copy(input)
 
-  if(battery){
-
-   # all <- CJ(file = bat$file, `Battery Position` = c("PRIMARY", "MOTOR"), record = c("first", "last"), unique = TRUE)
-    dtc <- dtc[, .SD[c(1,.N),],  by = .(file, `Battery Position`)]
-    first_bat <- dtc[, .SD[1,], by = .(file, `Battery Position`)]
-    first_bat[, record := "first"]
-    last_bat <- dtc[, .SD[.N], by = .(file, `Battery Position`)]
-    last_bat[, record := "last"]
-    dtc <- rbind(first_bat, last_bat)
-    dtc <- dcast(dtc, file + `Battery Position` ~  record, value.var = c("Time", "Battery Voltage (V)"))
-  }
-  
-  if(battery == FALSE){
     first_dtc <- dtc[, .SD[1],  by = .(file)]
     first_dtc[, record := "first"]
     last_dtc <- dtc[, .SD[.N], by = .(file)]
@@ -77,6 +66,5 @@ process_detections <- function(input, battery = FALSE){
     dtc <- rbind(first_dtc, last_dtc)
 #    dtc <- dtc[!is.na(record),]
     dtc <- dcast(dtc, file ~ record, value.var = c("Time", "Full ID"))
-  }
   return(dtc)
 }
