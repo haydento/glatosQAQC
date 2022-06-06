@@ -6,13 +6,13 @@
 ##' @export
 
 # if don't want to interactively choose files (for dev)
-  ## fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
+ ##    fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
 
- ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
- ##  mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
- ##  work_dir = "C:/Users/thayden/Desktop"
- ##  nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
- ##   action <- "down"
+ ## ## ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
+ ##    mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+ ##    work_dir = "C:/Users/thayden/Desktop"
+ ##   nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
+ ##    action <- "down"
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
@@ -33,31 +33,24 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   det <- glatosQAQC::process_detections(det)
 
   # extract file record from "DATA_SOURCE_FILE"
-  file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
-  file_id <- file_id[, c("file", "File Name")]
-  file_id[, `File Name` := shQuote(`File Name`)]
+ # file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
+ # file_id <- file_id[, c("file", "File Name")]
+ # file_id[, `File Name` := shQuote(`File Name`)]
 
   # combine detection records and file records
-  out <- merge(det, file_id, by = "file", all.x = TRUE)
+  #out <- merge(det, file_id, by = "file", all.x = TRUE)
   
   # extract receiver battery info
   bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
 
   # validate and assign vdat_bat class
-  bat <- vdat_bat(bat)
+  bat <- glatosQAQC::vdat_bat(bat)
 
   # Process battery records to summarize first and last voltages
   bat <- glatosQAQC::process_detections_battery(bat)
-  bat <- data.table::dcast(bat, file ~ `Battery Position`, value.var = "Battery Voltage (V)_last")
-
-  req_cols <- c("file", "PRIMARY", "MOTOR")
-  col_difs <- setdiff(req_cols, names(bat))
-  if(length(col_difs) > 0){
-    bat[, (col_difs) := NA_real_]
-  }
-  
+    
   # combine
-  out <- merge(out, bat, by = "file", all.x = TRUE)
+  out <- merge(det, bat, by = "file", all.x = TRUE)
 
   # extract map info for the receiver (in CFG_CHANNEL) 
   rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")
@@ -169,8 +162,8 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                               "Time_last",
                               "Full ID_first",
                               "Full ID_last",
-                              "PRIMARY",
                               "MOTOR",
+                              "PRIMARY",
                               "Time",
                               "Full ID",
                               "Power Level",
@@ -184,8 +177,8 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                          "last det",
                          "first tag",
                          "last tag",
-                         "rec bat_V",
                          "rel bat_V",
+                         "rec bat_V",
                          "int tag init",
                          "int tag ID",
                          "int tag power",

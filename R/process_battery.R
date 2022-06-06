@@ -31,15 +31,8 @@ process_detections_battery <- function(input){
   stopifnot(all(class(input) %in% c("vdat_bat", "data.table", "data.frame")))
   
   dtc <- copy(input)
-
-  # all <- CJ(file = bat$file, `Battery Position` = c("PRIMARY", "MOTOR"), record = c("first", "last"), unique = TRUE)
-  dtc <- dtc[, .SD[c(1,.N),],  by = .(file, `Battery Position`)]
-  first_bat <- dtc[, .SD[1,], by = .(file, `Battery Position`)]
-  first_bat[, record := "first"]
-  last_bat <- dtc[, .SD[.N], by = .(file, `Battery Position`)]
-  last_bat[, record := "last"]
-  dtc <- rbind(first_bat, last_bat)
-  dtc <- dcast(dtc, file + `Battery Position` ~  record, value.var = c("Time", "Battery Voltage (V)"))
-  
-return(dtc)
+  dtc <- melt(dtc, id.vars = c("file", "Time"), measure.vars = c("MOTOR", "PRIMARY"))
+  dtc <- dtc[dtc[, .(idx = .I[c(.N)]), by = .(file, variable)]$idx,]
+  dtc <- dcast(dtc, file  ~  variable, value.var = c("value"))  
+  return(dtc)
 }

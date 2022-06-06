@@ -69,6 +69,8 @@ vdat_dtc <- function(x){
 #################
 #x <- bat
 
+#x <- x[0,]
+
 #' @export
 vdat_bat <- function(x){
   stopifnot(is.data.table(x), is.data.frame(x))
@@ -100,9 +102,22 @@ vdat_bat <- function(x){
   set_int <- c("Serial Number")
   for(col in set_int)
     set(x, j = col, value = as.integer(x[[col]]))
+ark <- x
+ 
+  # handle an empty data.table
+  if(nrow(x) == 0){
+    x <- data.table(file = NA_character_, Time = as.POSIXct(NA, tz = "UTC"), MOTOR = NA_real_, PRIMARY = NA_real_)
+  } else {
 
-  
-#Assign class
+    x <- data.table::dcast(x, file + Time ~ `Battery Position`, value.var = "Battery Voltage (V)")
+    req_cols <- c("file", "Time", "PRIMARY", "MOTOR")
+    col_difs <- setdiff(req_cols, names(x))
+    if(length(col_difs) > 0){
+      x[, (col_difs) := NA_real_]
+    }
+  }
+
+  #Assign class
   x <- structure(x, 
                  class = c("vdat_bat", class(x)))
 
