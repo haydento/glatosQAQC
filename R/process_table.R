@@ -6,13 +6,13 @@
 ##' @export
 
 # if don't want to interactively choose files (for dev)
- ##    fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
+ ##     fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
 
- ## ## ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
- ##    mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
- ##    work_dir = "C:/Users/thayden/Desktop"
- ##   nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
- ##    action <- "down"
+ ## ## ## ## ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
+ ##      mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+ ##      work_dir = "C:/Users/thayden/Desktop"
+ ##     nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
+ ##     action <- "down"
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
@@ -33,12 +33,13 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   det <- glatosQAQC::process_detections(det)
 
   # extract file record from "DATA_SOURCE_FILE"
- # file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
- # file_id <- file_id[, c("file", "File Name")]
- # file_id[, `File Name` := shQuote(`File Name`)]
+  file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
+  file_id <- file_id[, c("file", "File Name")]
+  file_id[, `File Name` := shQuote(`File Name`)]
+  file_id[, `File Name` := substr(`File Name`, 1,12)]
 
   # combine detection records and file records
-  #out <- merge(det, file_id, by = "file", all.x = TRUE)
+  out <- merge(det, file_id, by = "file", all.x = TRUE)
   
   # extract receiver battery info
   bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
@@ -50,7 +51,7 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   bat <- glatosQAQC::process_detections_battery(bat)
     
   # combine
-  out <- merge(det, bat, by = "file", all.x = TRUE)
+  out <- merge(out, bat, by = "file", all.x = TRUE)
 
   # extract map info for the receiver (in CFG_CHANNEL) 
   rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")
@@ -171,7 +172,9 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                               "Max Delay (s)",
                               "Map ID",
                               "INITIALIZATION",
-                              "OFFLOAD"
+                              "OFFLOAD",
+                              "file",
+                              "File Name"
                               ),
                        c("first det",
                          "last det",
@@ -186,7 +189,9 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                          "int tag max delay",
                          "rec map",
                          "rec init",
-                         "rec download"))
+                         "rec download",
+                         "tst_file",
+                         "tst_file1"))
 
   # round memory available column to 1 digit
   out[, "mem avail" := round(out$'mem avail', 1)]
@@ -196,7 +201,9 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
   out[, "rec bat_V" := round(out$'rec bat_V', 1)]
 
   # prepare data for export
-  out <- out[, c("rec num",
+  out <- out[, c("tst_file",
+                 "tst_file1",
+                 "rec num",
                  "rec mod",
                  "rec firmware",
                  "rec map",
@@ -235,7 +242,7 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
               `int tag ID` = as.character(`int tag ID`),
               `int tag power` = as.character(`int tag power`),
               `int tag min delay` = as.character(`int tag min delay`),
-              `int tag max delay` = as.character(`int tag max delay`)      
+              `int tag max delay` = as.character(`int tag max delay`)
               )
               ]
 

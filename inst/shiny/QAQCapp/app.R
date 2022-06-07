@@ -1,3 +1,4 @@
+
 # code borrowed from this: https://stackoverflow.com/questions/56301940/import-file-and-append-to-previously-loaded-file-in-r-shiny
 # https://shiny.rstudio.com/articles/generating-reports.html
 # https://shiny.rstudio.com/gallery/file-download.html
@@ -90,7 +91,7 @@ ui <- fluidPage(
 
 # https://towardsdatascience.com/create-interactive-map-applications-in-r-and-r-shiny-for-exploring-geospatial-data-96b0f9692f0f
 # https://stackoverflow.com/questions/44504759/shiny-r-download-the-result-of-a-table
-
+# https://stackoverflow.com/questions/59449396/change-pagetype-in-dt-pagination-in-r-shiny-module
 server <- function(input, output, session) {
 
   
@@ -117,7 +118,8 @@ server <- function(input, output, session) {
     return(df)
   })
   
-  output$data.table1 <- DT::renderDT({QAQC(foo())}, escape = FALSE, server = FALSE)
+  output$data.table1 <- DT::renderDT({QAQC(foo())},
+      option = list(paging = FALSE), escape = FALSE, server = FALSE)
 
 
   
@@ -137,7 +139,7 @@ server <- function(input, output, session) {
   })
   
   
-  output$clk <- DT::renderDT({clk()}, escape = FALSE, server = FALSE)
+  output$clk <- DT::renderDT({clk()}, escape = FALSE, server = TRUE)
 }
 
 shinyApp(ui, server)
