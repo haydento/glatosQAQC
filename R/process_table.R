@@ -6,20 +6,20 @@
 ##' @export
 
 # if don't want to interactively choose files (for dev)
- ##     fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547547_20210528_1.vrl")
+ ## fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl")
 
- ## ## ## ## ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
- ##      mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
- ##      work_dir = "C:/Users/thayden/Desktop"
- ##     nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
- ##     action <- "down"
+ ## ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
+ ##       mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+ ##       work_dir = "C:/Users/thayden/Desktop"
+ ##      nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
+ ##      action <- "down"
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
 # https://stackoverflow.com/questions/52385295/get-the-name-of-an-uploaded-file-in-shiny
 
 process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
-  
+
   # convert vrls to csv format
   dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params, temp_dir = work_dir)
   
@@ -32,26 +32,35 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   # Process detection records to summarize first and last detections, and tags associated with detections
   det <- glatosQAQC::process_detections(det)
 
+  
   # extract file record from "DATA_SOURCE_FILE"
   file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
-  file_id <- file_id[, c("file", "File Name")]
-  file_id[, `File Name` := shQuote(`File Name`)]
-  file_id[, `File Name` := substr(`File Name`, 1,12)]
 
+  # these next three lines are a work-around that re-establishes
+  # a link between original file name and internal file name that is automatically assigned when the files are uploaded to server.
+  # this is a bug.  Not sure why or how file names within file are changed to automatically assigned shiny names
+  # behaviour is obvious when step through these lines starting browser from here...
+  # browser()
+  nme_mod <- as.data.table(nme)
+  nme_mod[, int_name := basename(datapath)]
+  file_id[nme_mod, `File Name` := nme_mod$name, on = .(file = int_name)]
+  
   # combine detection records and file records
   out <- merge(det, file_id, by = "file", all.x = TRUE)
+
+  ## # extract receiver battery info
+  ## bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
   
-  # extract receiver battery info
-  bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
+  ## # validate and assign vdat_bat class
+  ## bat <- glatosQAQC::vdat_bat(bat)
 
-  # validate and assign vdat_bat class
-  bat <- glatosQAQC::vdat_bat(bat)
+  
+  ## # Process battery records to summarize first and last voltages
+  ## bat <- glatosQAQC::process_detections_battery(bat)
 
-  # Process battery records to summarize first and last voltages
-  bat <- glatosQAQC::process_detections_battery(bat)
     
-  # combine
-  out <- merge(out, bat, by = "file", all.x = TRUE)
+  ## # combine
+  ## out <- merge(out, bat, by = "file", all.x = TRUE)
 
   # extract map info for the receiver (in CFG_CHANNEL) 
   rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")
@@ -163,8 +172,6 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                               "Time_last",
                               "Full ID_first",
                               "Full ID_last",
-                              "MOTOR",
-                              "PRIMARY",
                               "Time",
                               "Full ID",
                               "Power Level",
@@ -172,16 +179,11 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                               "Max Delay (s)",
                               "Map ID",
                               "INITIALIZATION",
-                              "OFFLOAD",
-                              "file",
-                              "File Name"
-                              ),
+                              "OFFLOAD"),
                        c("first det",
                          "last det",
                          "first tag",
                          "last tag",
-                         "rel bat_V",
-                         "rec bat_V",
                          "int tag init",
                          "int tag ID",
                          "int tag power",
@@ -189,20 +191,15 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                          "int tag max delay",
                          "rec map",
                          "rec init",
-                         "rec download",
-                         "tst_file",
-                         "tst_file1"))
+                         "rec download"
+                         ))
 
   # round memory available column to 1 digit
   out[, "mem avail" := round(out$'mem avail', 1)]
 
-  # round battery voltage
-  out[, "rel bat_V" := round(out$'rel bat_V', 1)]
-  out[, "rec bat_V" := round(out$'rec bat_V', 1)]
 
   # prepare data for export
-  out <- out[, c("tst_file",
-                 "tst_file1",
+  out <- out[, c("File Name",
                  "rec num",
                  "rec mod",
                  "rec firmware",
@@ -214,8 +211,6 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
                  "first det",
                  "last det",
                  "num det",
-                 "rel bat_V",
-                 "rec bat_V",
                  "int tag init",
                  "int tag ID",
                  "int tag power",
@@ -236,8 +231,6 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
               `first det` = as.POSIXct(`first det`, tz = "UTC"),
               `last det` = as.POSIXct(`last det`, tz = "UTC"),
               `num det` = as.numeric(`num det`),
-              `rel bat_V` = as.numeric(`rel bat_V`),
-              `rec bat_V` = as.numeric(`rec bat_V`),
               `int tag init` = as.POSIXct(`int tag init`, tz = "UTC"),
               `int tag ID` = as.character(`int tag ID`),
               `int tag power` = as.character(`int tag power`),
@@ -247,7 +240,24 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
               ]
 
   # add in file name info to output table
-  out[, file := as.character(nme)]
+  # order of records are not same.  THis causes a mismatch of rows with receivers.
+
+  ## tst <- data.frame(name = c("VR2AR_546908_20190610_1.vrl", "VR2AR_546310_20190607_1.vrl", "VR2AR_547547_20210528_1.vrl"), size = c(772460, 1486380, 12314), type = c("","",""), datapath = c("C:\\Users\\thayden\\AppData\\Local\\Temp\\2\\RtmpawIRf0/5ac847036f9463dc36e6b01c/0.vrl", "C:\\Users\\thayden\\AppData\\Local\\Temp\\2\\RtmpawIRf0/5ac847036f9463dc36e6b01c/1.vrl", "C:\\Users\\thayden\\AppData\\Local\\Temp\\2\\RtmpawIRf0/5ac847036f9463dc36e6b01c/2.vrl"))
+
+  ## browser()
+  
+  ## # match(out[["tst_file"]], tst$name)
+  ## nme <- nme$name[match(basename(nme$datapath), out[["tst_file"]])]
+
+  ## nme$id <- basename(nme$datapath)
+
+
+  
+  ## out[[tst_file
+
+  ## print(nme)
+                                                                                                    
+  ## out[, file := as.character(nme)]
   
   # add in action type
   if (action == "down"){

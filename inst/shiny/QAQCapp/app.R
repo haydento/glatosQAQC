@@ -70,6 +70,7 @@ ui <- fluidPage(
 
               tabsetPanel(type = "tabs",
                           tabPanel("rec data",
+                                  #tableOutput('data.table1') %>%
                                    DT::DTOutput('data.table1') %>%
                                      shinycssloaders::withSpinner(color="#0dc5c1", size = 1.5, type = 3, color.background = "white")),
                           tabPanel("computer time sync",
@@ -109,7 +110,8 @@ server <- function(input, output, session) {
     if(is.null(input$file1)) return(NULL)
 #    print(glimpse(input$file1$datapath))
 #    print(glimpse(input$file1$name))
-    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1$name, action = tst, mrk_params = vdat_call, work_dir = tempdir())
+    print(glimpse(input$file1))
+    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
 
  #   print(glimpse(olddf))
  #   print(glimpse(df))
@@ -117,11 +119,11 @@ server <- function(input, output, session) {
     isolate(df_all(df))
     return(df)
   })
+
+  #output$data.table1 <- renderTable({QAQC(foo())})
   
   output$data.table1 <- DT::renderDT({QAQC(foo())},
-      option = list(paging = FALSE), escape = FALSE, server = FALSE)
-
-
+                                     option = list(paging = FALSE), escape = FALSE, server = FALSE)
   
   # https://shiny.rstudio.com/reference/shiny/1.0.5/downloadHandler.html
   output$downloadData <- downloadHandler(

@@ -39,10 +39,10 @@
 compile_vdats <- function(vdat_files, v_path, temp_dir = tempdir()){
   
 #convert <- glatosQAQC::vrl_to_csv(vrl_file=vdat_files, out_dir = temp_dir, vdat_path = v_path, show_progress = FALSE)
-convert <- vrl_to_csv(vrl_file=vdat_files, out_dir = temp_dir, vdat_path = v_path)
+convert <- glatosQAQC::vrl_to_csv(vrl_file=vdat_files, out_dir = temp_dir, vdat_path = v_path)
 
   fls <- convert$output_file
-  
+
   # extract data needed for report and save in a list
   vdat <- vector("list", length(fls))
   names(vdat) <- basename(fls)

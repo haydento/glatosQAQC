@@ -58,13 +58,12 @@ process_detections <- function(input){
   stopifnot(all(class(input) %in% c("vdat_dtc", "data.table", "data.frame")))
   
   dtc <- copy(input)
-
+  
     first_dtc <- dtc[, .SD[1],  by = .(file)]
     first_dtc[, record := "first"]
     last_dtc <- dtc[, .SD[.N], by = .(file)]
     last_dtc[, record := "last"]
     dtc <- rbind(first_dtc, last_dtc)
-#    dtc <- dtc[!is.na(record),]
     dtc <- dcast(dtc, file ~ record, value.var = c("Time", "Full ID"))
   return(dtc)
 }

@@ -23,9 +23,9 @@
 ##' # process detections necessary for download report generation.
 ##' out <- process_detections(df)
 ##'
-##'
+##' 
 ##' @export
-##' @import data.table
+
 process_detections_battery <- function(input){
 
   stopifnot(all(class(input) %in% c("vdat_bat", "data.table", "data.frame")))
@@ -33,6 +33,6 @@ process_detections_battery <- function(input){
   dtc <- copy(input)
   dtc <- melt(dtc, id.vars = c("file", "Time"), measure.vars = c("MOTOR", "PRIMARY"))
   dtc <- dtc[dtc[, .(idx = .I[c(.N)]), by = .(file, variable)]$idx,]
-  dtc <- dcast(dtc, file  ~  variable, value.var = c("value"))  
+  dtc <- dcast(dtc, file  ~  variable, value.var = c("value"))
   return(dtc)
 }

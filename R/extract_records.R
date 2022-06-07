@@ -39,7 +39,7 @@ extract_records <- function(vdat, type = "DET"){
   
   # create combined data.table object for detections from all files
   dtc <- data.table::rbindlist(lapply(vdat, "[[", type), idcol = "file")
-
+  
   # change file ending to .vrl instead of .csv
   dtc[, file := gsub(".csv", ".vrl", file, fixed = TRUE)]
 
