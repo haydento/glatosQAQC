@@ -126,13 +126,14 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
   
   # extract integrated tag info
   i_tag <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_TRANSMITTER")
-  setkey(i_tag, Time, file)
-
-  i_tag[, start := Time]
-  i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"]
-  i_tag <- i_tag[ !is.na(end),]
   
-
+  if(nrow(i_tag) > 0){
+    
+    setkey(i_tag, Time, file)
+    i_tag[, start := Time]
+    i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"]
+    i_tag <- i_tag[ !is.na(end),]
+  
   # simplify events for dev (no NA init)
   #event <- event[1,]
 #  ark <- event
@@ -140,15 +141,13 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
 #  ark_i_tag <- i_tag
 #  ark_event <- event
   
-  event <- alt_init[event, on = "file",]
-  event[,`:=`(start = `INITIALIZATION`, end = `comp download`)]
-  event[is.na(start), start := alt_init]
+    event <- alt_init[event, on = "file",]
+    event[,`:=`(start = `INITIALIZATION`, end = `comp download`)]
+    event[is.na(start), start := alt_init]
     
 #######3#######
 
-
-  if(nrow(i_tag) > 0){
-
+  
     # event <- event[!is.na(start),]
     setkey(event, file, start, end)
     setkey(i_tag, file, start, end)
