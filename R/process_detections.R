@@ -55,7 +55,10 @@
 
 process_detections <- function(input){
 
+  # stop if not correct class
   stopifnot(all(class(input) %in% c("vdat_dtc", "data.table", "data.frame")))
+
+    
   
   dtc <- copy(input)
   

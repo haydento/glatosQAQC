@@ -24,11 +24,6 @@
 ##' @export
 ##' @import data.table
 
-## ark <- dtc
-## dtc <- ark
-## vdat = dtc[c(3)]
-## type = "CFG_TRANSMITTER"
-
 
 extract_records <- function(vdat, type = "DET"){
 
@@ -39,9 +34,17 @@ extract_records <- function(vdat, type = "DET"){
   
   # create combined data.table object for detections from all files
   dtc <- data.table::rbindlist(lapply(vdat, "[[", type), idcol = "file")
+
+  # creates NAs for all columns except file name and appends to table.
+  # This is only neede if no detections are recorded (should be rare). 
+  missing <- setdiff(names(vdat), unique(dtc$file))
+  
+  if(length(missing) > 0){
+    dtc <-  rbind(data.table(file = missing), dtc, fill = TRUE)
+  }
   
   # change file ending to .vrl instead of .csv
   dtc[, file := gsub(".csv", ".vrl", file, fixed = TRUE)]
-
+  
   return(dtc)
 }

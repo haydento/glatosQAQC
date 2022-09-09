@@ -3,20 +3,20 @@
 ##' @param fls a character vector of files to include in report
 ##' @param params rmarkdown parameters needed to process data
 ##' @param work_dir working directory where processing takes place
-##' @export
 
-# if don't want to interactively choose files (for dev)
- ## fls <- c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl")
 
- ## ## fls <- c("C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109412_20190619_1.vrl", "C:/Users/thayden/Documents/glatosQAQC/inst/extdata/VR2W_109420_20190619_1.vrl")
- ##       mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
- ##       work_dir = "C:/Users/thayden/Desktop"
- ##      nme <- c("VR2AR_547540_20210528_1.vrl", "VR2AR_547539_20210528_1.vrl")
- ##      action <- "down"
+# if don't want to interactively choose files
+#' fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl")
+#' mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+#' work_dir = "C:/Users/thayden/Desktop"
+#' nme <- c("VR2AR_547562_1.vrl", "VR2Tx_480029_20220906_1.vrl")
+#' action <- "down"
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
 # https://stackoverflow.com/questions/52385295/get-the-name-of-an-uploaded-file-in-shiny
+
+##' @export
 
 process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
 
@@ -31,7 +31,6 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
 
   # Process detection records to summarize first and last detections, and tags associated with detections
   det <- glatosQAQC::process_detections(det)
-
   
   # extract file record from "DATA_SOURCE_FILE"
   file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
@@ -62,7 +61,7 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   ## # combine
   ## out <- merge(out, bat, by = "file", all.x = TRUE)
 
-  # extract map info for the receiver (in CFG_CHANNEL) 
+  # extract receiver map info for the receiver (in CFG_CHANNEL) 
   rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")
 
   # extract only needed map info (rec map)
@@ -72,11 +71,11 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   # combine
   out <- merge(out, rec_map, by = "file", all.x = TRUE)
 
-  ###### clock ref table
+  # extract clock info (offload time, initilization time) from clock ref table
   new_event_offload <- glatosQAQC::extract_records(vdat = dtc, type = "CLOCK_REF")
   new_rec_init_down <- data.table::dcast(new_event_offload, file ~ Source, value.var = c("Device Time (UTC)"))
 
-  # nothing is written to vdat file if initialization or offload is messed up.  This makes sure that table contains both "offload" and "initialization" columns.
+  # nothing is written to vdat file if initialization or offload is messed up.  This next code block makes sure that table contains both "offload" and "initialization" columns.
   req_cols <- c("file", "OFFLOAD", "INITIALIZATION")
   col_difs <- setdiff(req_cols, names(new_rec_init_down))
   if(length(col_difs) > 0){
@@ -98,7 +97,7 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
 
   new_stats <- glatosQAQC::extract_records(vdat = dtc, type = "EVENT_OFFLOAD")
   new_stats <- new_stats[, c("file", "Model", "PPM Total Accepted Detections", "Memory Remaining (%)")]
-data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Memory Remaining (%)"), c("rec mod", "num det", "mem avail"))
+  data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Memory Remaining (%)"), c("rec mod", "num det", "mem avail"))
 
   # extract event offload for the receivers
   #event_offload <- glatosQAQC::extract_records(vdat = dtc, type = "EVENT_OFFLOAD")
@@ -132,22 +131,21 @@ data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Mem
     setkey(i_tag, Time, file)
     i_tag[, start := Time]
     i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"]
+    i_tag[, n_row := .N, by = "file"]
+    i_tag[n_row == 1, end := Sys.time()]
     i_tag <- i_tag[ !is.na(end),]
-  
-  # simplify events for dev (no NA init)
-  #event <- event[1,]
-#  ark <- event
-
-#  ark_i_tag <- i_tag
-#  ark_event <- event
+    
+    # simplify events for dev (no NA init)
+    #event <- event[1,]
+    #  ark <- event
+    
+    #  ark_i_tag <- i_tag
+    #  ark_event <- event
   
     event <- alt_init[event, on = "file",]
     event[,`:=`(start = `INITIALIZATION`, end = `comp download`)]
     event[is.na(start), start := alt_init]
     
-#######3#######
-
-  
     # event <- event[!is.na(start),]
     setkey(event, file, start, end)
     setkey(i_tag, file, start, end)

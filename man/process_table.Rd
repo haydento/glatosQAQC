@@ -9,7 +9,12 @@ process_table(fls, mrk_params, nme, action, work_dir = work_dir)
 \arguments{
 \item{fls}{a character vector of files to include in report}
 
-\item{work_dir}{working directory where processing takes place}
+\item{work_dir}{working directory where processing takes place
+fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl")
+mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
+work_dir = "C:/Users/thayden/Desktop"
+nme <- c("VR2AR_547562_1.vrl", "VR2Tx_480029_20220906_1.vrl")
+action <- "down"}
 
 \item{params}{rmarkdown parameters needed to process data}
 }

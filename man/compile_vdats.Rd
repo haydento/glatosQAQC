@@ -32,7 +32,16 @@ tst <- vrl_to_csv(vrl_file = vrl_file, out_dir = tempdir(), vdat_path = vpath)
 
 
 foo <- compile_vdats(vdat_files = vrl, v_path = vpath)
-vdat_files = c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl", "C:/Users/thayden/Documents/VR2AR_547571_20210713_1.vrl")
+vdat_files = c(
+"C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl",
+"C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl",
+"C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_483620_20220906_1.vrl",
+"C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_483626_20220906_1.vrl",
+"C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_483638_20220906_1.vrl",
+"C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_483813_20220906_1.vrl" ,
+"C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl")
+
+
 v_path = c("C:/Program Files/Innovasea/Fathom/vdat.exe")
 temp_dir = "C:/Users/thayden/Desktop"
 foo <- compile_vdats(vdat_files = vdat_files, v_path = v_path, temp_dir = temp_dir)
