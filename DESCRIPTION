@@ -1,7 +1,7 @@
 Package: glatosQAQC
 Type: Package
 Title: glatosQAQC shiny app to interactively check file validity of log files downloaded from Innovasea acoustic receivers
-Version: 0.3.0.0
+Version: 0.3.0.1
 Date: 2020-05-06
 Authors@R: 
     person(given = "Todd",

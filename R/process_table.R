@@ -6,11 +6,12 @@
 
 
 # if don't want to interactively choose files
-#' fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl")
+#' fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl")
 #' mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
 #' work_dir = "C:/Users/thayden/Desktop"
-#' nme <- c("VR2AR_547562_1.vrl", "VR2Tx_480029_20220906_1.vrl")
+#' nme <- c("VR2AR_547562_20220906_1.vrl", "VR2Tx_480029_20220906_1.vrl", "VR2W_106323_20140701_1.vrl")
 #' action <- "down"
+#' datapath = file.path(tempdir(), c("0.vrl", "1.vrl", "2.vrl"))
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
 ## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
@@ -18,7 +19,7 @@
 
 ##' @export
 
-process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
+process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, datapath = datapath){
 
   # convert vrls to csv format
   dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params, temp_dir = work_dir)
@@ -39,10 +40,15 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   # a link between original file name and internal file name that is automatically assigned when the files are uploaded to server.
   # this is a bug.  Not sure why or how file names within file are changed to automatically assigned shiny names
   # behaviour is obvious when step through these lines starting browser from here...
-  # browser()
+  browser()
+  
   nme_mod <- as.data.table(nme)
   nme_mod[, int_name := basename(datapath)]
-  file_id[nme_mod, `File Name` := nme_mod$name, on = .(file = int_name)]
+#  file_id[nme_mod, `File Name` := nme_mod$nme, on = .(file = int_name)]
+
+
+  file_id =  file_id[nme_mod, on = .(file = int_name)]
+
   
   # combine detection records and file records
   out <- merge(det, file_id, by = "file", all.x = TRUE)
@@ -125,11 +131,12 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
   
   # extract integrated tag info
   i_tag <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_TRANSMITTER")
+  i_tag <- vdat_i_tag(i_tag)  
   
   if(nrow(i_tag) > 0){
     
     setkey(i_tag, Time, file)
-    i_tag[, start := Time]
+    i_tag$start <- i_tag$Time  
     i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"]
     i_tag[, n_row := .N, by = "file"]
     i_tag[n_row == 1, end := Sys.time()]
@@ -138,7 +145,6 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
     # simplify events for dev (no NA init)
     #event <- event[1,]
     #  ark <- event
-    
     #  ark_i_tag <- i_tag
     #  ark_event <- event
   
@@ -149,12 +155,20 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir){
     # event <- event[!is.na(start),]
     setkey(event, file, start, end)
     setkey(i_tag, file, start, end)
-    tst <- foverlaps(event, i_tag)
+    tst <- foverlaps(event, i_tag[!is.na(Time),])
+    
     tst[, duration := as.numeric(lubridate::as.duration(lubridate::intersect(lubridate::interval(start, end), lubridate::interval(i.start, i.end))))]
     
-    # find maximum for each 
-    tst <- tst[tst[, .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
+    # extract receivers that don't have integrated tag or NA in duration column
+    no_int <- tst[is.na(duration),]
 
+    # find maximum for each
+    tst <- tst[tst[!is.na(duration), .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
+
+    if(nrow(no_int > 0)){
+      tst <- rbind(tst, no_int, fill = TRUE)
+    }
+    
     #  i_tag[`Power Level` == "DISABLED", `:=` (`Min Delay (s)` = NA, `Max Delay (s)` = NA)]
   } else {
 
