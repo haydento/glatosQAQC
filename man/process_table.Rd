@@ -18,6 +18,8 @@ process_table(
 
 \item{work_dir}{working directory where processing takes place
 fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl")
+
+fls <- c("C:/Users/thayden/Documents/big_test/VR2W_106324_20110727_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106324_20140616_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl")
 mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
 work_dir = "C:/Users/thayden/Desktop"
 nme <- c("VR2AR_547562_20220906_1.vrl", "VR2Tx_480029_20220906_1.vrl", "VR2W_106323_20140701_1.vrl")

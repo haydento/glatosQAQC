@@ -7,6 +7,8 @@
 
 # if don't want to interactively choose files
 #' fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl")
+#'
+#' fls <- c("C:/Users/thayden/Documents/big_test/VR2W_106324_20110727_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106324_20140616_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl")
 #' mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
 #' work_dir = "C:/Users/thayden/Desktop"
 #' nme <- c("VR2AR_547562_20220906_1.vrl", "VR2Tx_480029_20220906_1.vrl", "VR2W_106323_20140701_1.vrl")
@@ -40,15 +42,11 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
   # a link between original file name and internal file name that is automatically assigned when the files are uploaded to server.
   # this is a bug.  Not sure why or how file names within file are changed to automatically assigned shiny names
   # behaviour is obvious when step through these lines starting browser from here...
-  browser()
+  #browser()
   
   nme_mod <- as.data.table(nme)
   nme_mod[, int_name := basename(datapath)]
-#  file_id[nme_mod, `File Name` := nme_mod$nme, on = .(file = int_name)]
-
-
-  file_id =  file_id[nme_mod, on = .(file = int_name)]
-
+  file_id[nme_mod, `File Name` := nme_mod$name, on = .(file = int_name)]
   
   # combine detection records and file records
   out <- merge(det, file_id, by = "file", all.x = TRUE)
@@ -127,11 +125,16 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
 
   # combine
   out <- merge(out, new_stats, by = "file", all.x = TRUE)
-
   
   # extract integrated tag info
   i_tag <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_TRANSMITTER")
-  i_tag <- vdat_i_tag(i_tag)  
+  i_tag <- glatosQAQC::vdat_i_tag(i_tag)
+  i_tag <- i_tag[!is.na(Time),]
+
+
+  # create null table if no recs have integrated tags
+  null_i_tag <- data.table( file = NA_character_, Time = as.POSIXct(NA, tz = "UTC"), `Power Level` = NA_character_, `Min Delay (s)` = NA_integer_, `Max Delay (s)` = NA_integer_, `Full ID` = NA_character_)
+
   
   if(nrow(i_tag) > 0){
     
@@ -155,26 +158,25 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
     # event <- event[!is.na(start),]
     setkey(event, file, start, end)
     setkey(i_tag, file, start, end)
-    tst <- foverlaps(event, i_tag[!is.na(Time),])
+    tst <- foverlaps(event, i_tag)
     
     tst[, duration := as.numeric(lubridate::as.duration(lubridate::intersect(lubridate::interval(start, end), lubridate::interval(i.start, i.end))))]
     
     # extract receivers that don't have integrated tag or NA in duration column
-    no_int <- tst[is.na(duration),]
+    tst <- tst[!is.na(duration),]
 
     # find maximum for each
     tst <- tst[tst[!is.na(duration), .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
-
-    if(nrow(no_int > 0)){
-      tst <- rbind(tst, no_int, fill = TRUE)
+    
+    if(nrow(tst) == 0){
+      tst <- null_i_tag
     }
     
-    #  i_tag[`Power Level` == "DISABLED", `:=` (`Min Delay (s)` = NA, `Max Delay (s)` = NA)]
   } else {
 
-    tst <- data.table( file = NA_character_, Time = as.POSIXct(NA, tz = "UTC"), `Power Level` = NA_character_, `Min Delay (s)` = NA_integer_, `Max Delay (s)` = NA_integer_, `Full ID` = NA_character_)}
+    tst <- null_i_tag
+  }
   
-
   # combine objects
   out <- merge(out, tst, by = "file", all.x = TRUE)
   

@@ -130,6 +130,7 @@ ark <- x
 #' @examples
 #' i_tag <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_TRANSMITTER")
 #' vdat_i_tag(i_tag)
+#' @export
 
 vdat_i_tag <- function(x){
   stopifnot(is.data.table(x), is.data.frame(x))
@@ -189,7 +190,6 @@ x[, `Serial Number` := tstrsplit(file, "_", keep = 1)]
 #Assign class
   x <- structure(x, 
                  class = c("vdat_itag", class(x)))
-
   return(x)
 }
 
