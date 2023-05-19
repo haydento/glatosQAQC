@@ -6,17 +6,17 @@
 
 
 # if don't want to interactively choose files
-#' fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl")
+#' fls <- c("c:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_546906_20230516_1.vrl", "c:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_547544_20230516_1.vrl")
 #'
-#' fls <- c("C:/Users/thayden/Documents/big_test/VR2W_106324_20110727_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106324_20140616_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl")
+#'
 #' mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
 #' work_dir = "C:/Users/thayden/Desktop"
-#' nme <- c("VR2AR_547562_20220906_1.vrl", "VR2Tx_480029_20220906_1.vrl", "VR2W_106323_20140701_1.vrl")
+#' nme <- c("VR2AR_546906_20230516_1.vrl", "VR2AR_547544_20230516_1.vrl")
 #' action <- "down"
-#' datapath = file.path(tempdir(), c("0.vrl", "1.vrl", "2.vrl"))
+#' datapath = file.path(tempdir(), c("0.vrl", "1.vrl"))
 
 ## ## ## #  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
-## #foo <-  process_table(fls = fls, mrk_params = mrk_params, work_dir = "C:/Users/thayden/Desktop")
+#' foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = "C:/Users/thayden/Desktop")
 # https://stackoverflow.com/questions/52385295/get-the-name-of-an-uploaded-file-in-shiny
 
 ##' @export
@@ -25,7 +25,13 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
 
   # convert vrls to csv format
   dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params, temp_dir = work_dir)
-  
+
+  # extract vdat version used to extract data
+  y <- function(x){attributes(x)$vdat_version}
+  vdat_ver <- lapply(dtc, y)
+  f_name <- sub(".csv", ".vrl", names(vdat_ver))
+  vdat_ver <- data.table(file = f_name, vdat = vdat_ver)
+
   # extract detection records for each file
   det <- glatosQAQC::extract_records(vdat = dtc, type = "DET")
 
@@ -51,6 +57,9 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
   # combine detection records and file records
   out <- merge(det, file_id, by = "file", all.x = TRUE)
 
+  # combine detection records and vdat version info
+  out <- merge(out, vdat_ver, by = "file", all.x = TRUE)
+  
   ## # extract receiver battery info
   ## bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
   
@@ -192,7 +201,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
                               "Max Delay (s)",
                               "Map ID",
                               "INITIALIZATION",
-                              "OFFLOAD"),
+                              "OFFLOAD",
+                              "vdat"),
                        c("first det",
                          "last det",
                          "first tag",
@@ -204,7 +214,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
                          "int tag max delay",
                          "rec map",
                          "rec init",
-                         "rec download"
+                         "rec download",
+                         "vdat_ver"
                          ))
 
   # round memory available column to 1 digit
@@ -228,7 +239,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
                  "int tag ID",
                  "int tag power",
                  "int tag min delay",
-                 "int tag max delay"
+                 "int tag max delay",
+                 "vdat_ver"
                  )
              ]   
 
@@ -248,7 +260,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
               `int tag ID` = as.character(`int tag ID`),
               `int tag power` = as.character(`int tag power`),
               `int tag min delay` = as.character(`int tag min delay`),
-              `int tag max delay` = as.character(`int tag max delay`)
+              `int tag max delay` = as.character(`int tag max delay`),
+              `vdat_ver` = as.character(`vdat_ver`)
               )
               ]
 

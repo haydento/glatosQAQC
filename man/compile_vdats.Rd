@@ -40,10 +40,11 @@ vdat_files = c(
 "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_483638_20220906_1.vrl",
 "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_483813_20220906_1.vrl" ,
 "C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl")
+vdat_files <- system.file("extdata/VR2W_109412_20190619_1.vrl", package = "glatosQAQC")
 
-
+vdat_files <- "C:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_546906_20230516_1.vrl"
 v_path = c("C:/Program Files/Innovasea/Fathom/vdat.exe")
-temp_dir = "C:/Users/thayden/Desktop"
+temp_dir = tempdir()
 foo <- compile_vdats(vdat_files = vdat_files, v_path = v_path, temp_dir = temp_dir)
 }
 \author{

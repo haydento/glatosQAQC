@@ -17,14 +17,14 @@ process_table(
 \item{fls}{a character vector of files to include in report}
 
 \item{work_dir}{working directory where processing takes place
-fls <- c("C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2Tx_480029_20220906_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl")
+fls <- c("c:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_546906_20230516_1.vrl", "c:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_547544_20230516_1.vrl")
 
-fls <- c("C:/Users/thayden/Documents/big_test/VR2W_106324_20110727_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106324_20140616_1.vrl", "C:/Users/thayden/Documents/big_test/VR2W_106323_20140701_1.vrl", "C:/Users/thayden/Desktop/QAQC_weirdness/VR2AR_547562_20220906_1.vrl")
 mrk_params = "C:/Program Files/Innovasea/Fathom/vdat.exe"
 work_dir = "C:/Users/thayden/Desktop"
-nme <- c("VR2AR_547562_20220906_1.vrl", "VR2Tx_480029_20220906_1.vrl", "VR2W_106323_20140701_1.vrl")
+nme <- c("VR2AR_546906_20230516_1.vrl", "VR2AR_547544_20230516_1.vrl")
 action <- "down"
-datapath = file.path(tempdir(), c("0.vrl", "1.vrl", "2.vrl"))}
+datapath = file.path(tempdir(), c("0.vrl", "1.vrl"))
+foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = "C:/Users/thayden/Desktop")}
 
 \item{params}{rmarkdown parameters needed to process data}
 }

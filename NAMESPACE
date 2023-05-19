@@ -2,9 +2,11 @@
 
 export(QAQC)
 export(QAQCapp)
+export(check_vdat)
 export(col_class_out)
 export(compile_vdats)
 export(extract_records)
+export(get_local_vdat_version)
 export(process_detections)
 export(process_detections_battery)
 export(process_table)
