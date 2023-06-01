@@ -57,9 +57,12 @@
 #' @export
 
 #' @examples
-#' vrl_file = c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl")
+#' vrl_file <- c(
+#' "C:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_546906_20230516_1.vrl",
+#' "C:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_547544_20230516_1.vrl"
+#' )
 #' vdat_path = c("C:/Program Files/Innovasea/Fathom/vdat.exe")
-#' out_dir = "C:/Users/thayden/Desktop"
+#' out_dir = tempdir()
 #' vrl_to_csv(vrl_file, out_dir = out_dir, vdat_path = vdat_path)
 
 vrl_to_csv <- function(vrl_file = NULL, out_dir = NULL, 
@@ -70,7 +73,7 @@ vrl_to_csv <- function(vrl_file = NULL, out_dir = NULL,
   # check to make sure vdat is installed and accessible
   vdat_ok <- suppressWarnings(system2(path.expand(vdat_path), args = "--version", stdout = FALSE, stderr = FALSE))
   if(vdat_ok == 127) stop("vdat not found.  Check path to vdat and make sure vdat software is installed and accessible to system")
-
+ 
   #set out_dir to source file location if not given
   if(is.null(out_dir)) out_dir <- ifelse(is.null(vrl_dir), 
                                          dirname(vrl_file), vrl_dir)
@@ -88,18 +91,35 @@ vrl_to_csv <- function(vrl_file = NULL, out_dir = NULL,
   cmd <- path.expand(file.path(vdat_path))
 
   # prepare arguments to command line call
-  args <- c("convert", "--format=csv.fathom", "--timec=default", paste("--output", shQuote(out_dir)), shQuote(vrl_file))
+  #args <- c("convert", "--format=csv.fathom", "--timec=default", paste("--output=", shQuote(out_dir)), shQuote(vrl_file))
 
-  msg <- system2(cmd, args)
+  ftp <- data.table::data.table(vrl_file = vrl_file,
+                                output_file = out_file,
+                                out_dir = out_dir,
+                                vdat_cmd = cmd,
+                                status = NA_real_,
+                                stdout = NA_character_,
+                                stderr = NA_character_)
+
+  # loop through and extract all files
+  for(i in 1:nrow(ftp)){
+    # start loop here- call each row of ftp table in order and collect output
+    args <- c("convert", "--format=csv.fathom", "--timec=default", paste0("--output=", ftp[[i,"out_dir"]]), ftp[[i, "vrl_file"]])
+
+    msg <- sys::exec_internal(cmd = cmd,
+                              args = args)
+    
+    ftp[i, `:=` (status = (msg$status), stdout = rawToChar(msg$stdout), stderr = rawToChar(msg$stderr))]
   
-  # message == 0 is no errors.
-  out <- data.frame(stringsAsFactors = FALSE,
-                    output_file = normalizePath(out_file), 
-                    file_size = file.size(out_file),
-                    status = msg)
+    # stop loop
+    #msg <- system2(cmd, args)
+  }
 
-  return(out)
-
+  
+  ftp[, file_size := file.size(output_file)][]
+  
+  return(ftp)
+  
   message("\nConversion complete.")
 
 }

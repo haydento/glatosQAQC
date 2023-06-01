@@ -65,9 +65,12 @@ vrl_file <- system.file("extdata",
   "VR2W_109924_20110718_1.vrl", package="glatosDS")
 vrl_to_csv(vrl_file, out_dir = dirname(vrl_file))
 
-vrl_file = c("C:/Users/thayden/Documents/VR2AR_546310_20190607_1.vrl", "C:/Users/thayden/Documents/VR2AR_546908_20190610_1.vrl")
+vrl_file <- c(
+"C:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_546906_20230516_1.vrl",
+"C:/Users/thayden/Documents/VR2AR_Samples_with_Gen2/new/VR2AR_547544_20230516_1.vrl"
+)
 vdat_path = c("C:/Program Files/Innovasea/Fathom/vdat.exe")
-out_dir = "C:/Users/thayden/Desktop"
+out_dir = tempdir()
 vrl_to_csv(vrl_file, out_dir = out_dir, vdat_path = vdat_path)
 }
 \author{
