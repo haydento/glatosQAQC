@@ -49,9 +49,11 @@ globalVariables(".")
   if(utils::compareVersion(vdat$version, min_vdat) < 0){
     m <- paste0("glatosQAQC version ", utils::packageVersion("glatosQAQC"), " ('walleye')", ", vdat.exe version found: ", vdat$version)
     m <- strwrap(m, width = getOption("width"))
-    packageStartupMessage(" WARNING: VDAT NOT INSTALLED OR OUT OF DATE. glatosQAQC OUTPUT MAY NOT BE INCORRECT!  UPDATE FATHOM BEFORE CONTINUING:")
-    packageStartupMessage(paste0(m, collapse = "\n"))    
+    packageStartupMessage(" WARNING: VDAT NOT INSTALLED OR OUT OF DATE. glatosQAQC OUTPUT MAY BE INCORRECT!  UPDATE FATHOM BEFORE CONTINUING:")
+    packageStartupMessage(paste0(m, collapse = "\n"))
+
   }
+
 }
 
 

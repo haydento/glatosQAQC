@@ -29,35 +29,38 @@
 check_vdat <- function(vdat_exe_path = NULL){
   
   if(is.null(vdat_exe_path)) {
-    vdat_cmd <- "VDAT"
+    pths <- c("C:/Program Files/Innovasea/Fathom/vdat.exe", "vdat.exe", "vdat")
+    pths <- Sys.which(pths)
     
-    if(Sys.which(vdat_cmd) == "") stop("VDAT.exe not found in system PATH ",
+    if(all(pths == "")) stop("VDAT.exe not found in system PATH ",
                                        "variable.", call. = FALSE)
-    
-  } else {
   
-    #remove VDAT.exe from vdat_exe_path if present
-    vdat_exe_dir <- ifelse(grepl("vdat.exe$", 
-                                 vdat_exe_path, 
-                                 ignore.case = TRUE),
-                           dirname(vdat_exe_path),
-                           vdat_exe_path)
+    vdat_call <- pths[pths != ""][1] 
     
-    vdat_exe_file <- file.path(vdat_exe_dir, "VDAT.exe")
-    
-    # Check path to VDAT.exe
-    if(!file.exists(vdat_exe_file)) stop("VDAT.exe not found at specified ",
-                                         "path.", call. = FALSE)
-    
-    vdat_cmd <- vdat_exe_file
-    
-    # Check if path can be reached via system call
-    if(Sys.which(vdat_cmd) == "") stop("VDAT.exe found but could not be ",
-                                       "reached via system call.", 
-                                       call. = FALSE)
-  }
+  } #else {
   
-  return(vdat_cmd)
+  ##   #remove VDAT.exe from vdat_exe_path if present
+  ##   vdat_exe_dir <- ifelse(grepl("vdat.exe$", 
+  ##                                vdat_exe_path, 
+  ##                                ignore.case = TRUE),
+  ##                          dirname(vdat_exe_path),
+  ##                          vdat_exe_path)
+    
+  ##   vdat_exe_file <- file.path(vdat_exe_dir, "VDAT.exe")
+    
+  ##   # Check path to VDAT.exe
+  ##   if(!file.exists(vdat_exe_file)) stop("VDAT.exe not found at specified ",
+  ##                                        "path.", call. = FALSE)
+    
+  ##   vdat_cmd <- vdat_exe_file
+    
+  ##   # Check if path can be reached via system call
+  ##   if(Sys.which(vdat_cmd) == "") stop("VDAT.exe found but could not be ",
+  ##                                      "reached via system call.", 
+  ##                                      call. = FALSE)
+  ## }
+  
+  return(vdat_call)
 }
 
 

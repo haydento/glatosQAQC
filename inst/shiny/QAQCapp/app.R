@@ -16,34 +16,33 @@ options(shiny.maxRequestSize = 20*1024^2)
 
 
 # determine OS and set vdat call
-os <- Sys.info()['sysname']
+#os <- Sys.info()['sysname']
 
-if(os == "Linux"){
-  vdat_call <- system.file("exec/vdat_linux", package = "glatosQAQC")}
+#if(os == "Linux"){
+#  vdat_call <- system.file("exec/vdat_linux", package = "glatosQAQC")}
 
 # if vdat is installed on windows machine via FATHOM, then use it instead of older version bundled with package
-if(os == "Windows"){
-  pths <- c("C:/Program Files/Innovasea/Fathom/vdat.exe", "vdat.exe", "vdat")
-  pths <- Sys.which(pths)
-  vdat_call <- pths[pths != ""][1]
+#if(os == "Windows"){
 
-  if(!is.na(vdat_call)){message("using FATHOM vdat.exe")}
-  if(is.na(vdat_call)){message("using packaged vdat.exe")}
+ # if(!is.na(vdat_call)){message("using FATHOM vdat.exe")}
+ # if(is.na(vdat_call)){message("using packaged vdat.exe")}
 
-  if(is.na(vdat_call)){
-    vdat_call <- system.file("exec/vdat.exe", package = "glatosQAQC")
-  }
+ # if(is.na(vdat_call)){
+ #   vdat_call <- system.file("exec/vdat.exe", package = "glatosQAQC")
+ # }
 
-}
+#}
 
  
 
-if(os == "Darwin"){
-  vdat_call <- system.file("exec/vdat_mac", package = "glatosQAQC")}
+#if(os == "Darwin"){
+#  vdat_call <- system.file("exec/vdat_mac", package = "glatosQAQC")}
 
-if(!is.null(vdat_call)){
-    vdat_call <-  normalizePath(vdat_call)
-}
+## if(!is.null(vdat_call)){
+##     vdat_call <-  normalizePath(vdat_call)
+## }
+
+vdat_call <- normalizePath(check_vdat())
 
 
 # Shiny #
