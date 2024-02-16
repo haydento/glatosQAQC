@@ -1,5 +1,7 @@
-##' Complete check of extracted detection data
+# Functions that identify suspect values obtained from extracted detection data
+
 #' @param out extracted data from VRL as created by running a process_table function - output only used in HTML report
+#' @details This function runs standard checks and colorcodes html output
 
 #' @export
 
@@ -14,15 +16,15 @@ QAQC <- function(out){
   # SOP is to test receiver immediately prior to download
   down_last_dtc_days <- as.Date(out$`rec download`) - as.Date(out$`last det`)
   
-  # color `last det` and `receiver download time` red when last det is not on same day as receiver download or when there is a NA in last detection or when `last det` is NA
+  # color last det and receiver download time red when last det is not on same day as receiver download or when there is a NA in last detection or when last det is NA
   # this check is based on SOP that says all receivers should be tested with sync tag immediately prior to download.
   out$`last det` <- kableExtra::cell_spec(out$`last det`, "html", color = ifelse(down_last_dtc_days !=0 | is.na(down_last_dtc_days) | is.na(out$`last det`), "red", "black"))
 
   out$`rec download` <- kableExtra::cell_spec(out$`rec download`, "html", color = ifelse(down_last_dtc_days != 0 | is.na(down_last_dtc_days), "red", "black"))
 
-  # color `first det` and `receiver initialize time` red when `first det` and `receiver initialize time` are not on the same day.
+  # color first det and receiver initialize time red when first det and receiver initialize time are not on the same day.
   # this check is based on SOP that says all receivers should be tested with syn tag immediately after initialization.
-  # also first det is colored red if `first det` is NA
+  # also first det is colored red if first det is NA
   init_days <- as.Date(out$`first det`) - as.Date(out$`rec init`) 
 
   out$`first det` <- kableExtra::cell_spec(out$`first det`, "html", color = ifelse(init_days != 0 | is.na(init_days) | is.na(out$`first det`), "red", "black"))
@@ -39,6 +41,9 @@ QAQC <- function(out){
 }
 
 
+#' Checks time of computer clock by extracting true time from internet
+#'
+#' @details identifies and colorcodes time differnce between computer and official internet time 
 #' @param input time-sync data generated from function
 
 #' @export
@@ -50,15 +55,16 @@ clock_QAQC <- function(input){
 }
 
 
-
+#' Colorcodes potential errors in excel output
+#'
+#' @details uses R package openxlsx to identify potential errors in vrl files and colorizes them using custom formatting in excel
 #' @param input output from "process table", runs checks and makes excel file
 #' @param output file path for excel worksheet
 #' 
 #' @export
 
-# does the formatting and prettyfying of excel download
 excel_QAQC <- function(input, output){
-
+  
   # bring in a list of worksheets (detections and metadata)
   meta <- input$metadata
 

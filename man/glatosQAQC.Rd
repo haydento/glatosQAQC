@@ -2,6 +2,7 @@
 % Please edit documentation in R/package-glatosQAQC.R
 \docType{package}
 \name{glatosQAQC}
+\alias{-package}
 \alias{glatosQAQC}
 \title{An R package for the QA/QC of vrl files downloaded from InnovaSea receivers}
 \description{

@@ -1,0 +1,85 @@
+---
+title: "Receiver download report"
+date: " `r format(Sys.time(), '%Y-%m-%d %H:%M')`"
+params:
+  vdat: "~/Documents/vdat-working-group/releases/vdat-2.7.1-20200703/Linux-x86_64/vdat"
+  output_c: ""
+  fls: ""
+---
+
+<style type="text/css">
+
+h1.title {
+	color: black;
+	text-align: center;
+	margin-bottom: 0;
+	
+}
+
+h4.date {
+	color: black;
+	text-align: center;
+}
+	
+</style>
+
+```{r setup, echo = FALSE, cache = FALSE, include = FALSE}
+options(knitr.table.format = "html")
+work_dir <- tempdir()
+knitr::opts_knit$set(root.dir = work_dir)
+```
+```{r make, echo = FALSE, message  = FALSE, warning = FALSE}
+
+# choose files
+#fls <- get_vrl()
+
+# if don't want to interactively choose files (for dev)
+#fls <- c("/home/todd/Documents/download_report_QAQC/VR2W_109412_20190619_1.vrl", "/home/todd/Documents/download_report_QAQC/VR2W_109420_20190619_1.vrl")
+#fls <- get_vrl()
+#fls <- "/home/todd/Desktop/dir 1/dir 2/dir 3/dir 4/VR2W_109412_20190619_1.vrl"
+
+#params = list(vdat =  system.file("exec/vdat_linux", package = "glatosQAQC"), fls = fls)
+#work_dir = tempdir()
+
+
+#dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = params$vdat, temp_dir = tempdir())
+
+
+
+out <- glatosQAQC::process_table(params$fls, mrk_params = params$vdat, work_dir = work_dir)
+
+# write out data for report
+data.table::fwrite(out, params$output_c) 
+
+# calculate time differences
+time_data <- glatosQAQC::time_compare()
+
+# format table, do QAQC checks, highlight wierd cell values in report
+out <- glatosQAQC::QAQC(out)
+
+```
+
+## **time sync:**
+ 
+| **computer time (UTC):** `r format(time_data$tlocal, tz = "UTC")`
+
+| **NIST time (UTC):**  `r time_data$tnist`
+
+| **difference (s):** `r time_data$tsync`
+
+
+<br>
+
+```{r table, echo = FALSE}
+
+x_html <- knitr::kable(out, escape = FALSE, align = "c")
+kableExtra::kable_styling(x_html, bootstrap_options = c("striped", "hover", "condensed"),
+              fixed_thead = TRUE, full_width = TRUE, font_size = 10)
+```
+<br>
+
+## **report export:** 
+```{r export, echo = FALSE}
+params$output_c
+
+```
