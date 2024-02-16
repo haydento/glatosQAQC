@@ -1,7 +1,7 @@
 Package: glatosQAQC
 Type: Package
 Title: glatosQAQC shiny app to interactively check file validity of log files downloaded from Innovasea acoustic receivers
-Version: 0.3.1.1
+Version: 0.4.1.1
 Date: 2023-06-01
 Authors@R: 
     person(given = "Todd",
@@ -13,7 +13,7 @@ License: GPL-2
 Encoding: UTF-8
 LazyData: true
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.1
 Imports:
 	data.table (>= 1.14.0),
 	httr,
@@ -23,6 +23,7 @@ Imports:
 	shiny,
 	DT,
 	shinycssloaders,
+	openxlsx
 Depends: R (>= 4.0.0)
 LazyLoad: yes
 Suggests: 

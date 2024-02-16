@@ -14,10 +14,12 @@ time_compare <- function(){
 
   #calculate difference in seconds
   tsync <- abs(round(as.numeric(tnist) - as.numeric(tlocal), 2))
-  tsync <- kableExtra::cell_spec(tsync, "html", color = ifelse(tsync >= 2 | is.na(tsync), "red", "black")) 
+  #tsync <- kableExtra::cell_spec(tsync, "html", color = ifelse(tsync >= 2 | is.na(tsync), "red", "black")) 
 
 
-  out <- data.table("NIST time (lcl)" = format(tnist, tz = "America/Detroit"), "computer time (lcl)" = format(tlocal, tz = "America/Detroit"), "time difference (s)" = tsync)
+  out <- data.table(field = c("NIST time (lcl)", "computer time (lcl)", "time difference"), value = c(format(tnist, tz = "America/Detroit"), format(tlocal, tz = "America/Detroit"), tsync))  
+  
+  #out <- data.table("NIST time (lcl)" = format(tnist, tz = "America/Detroit"), "computer time (lcl)" = format(tlocal, tz = "America/Detroit"), "time difference (s)" = tsync)
   
 #  out <- list(tnist = tnist, tlocal = tlocal, tsync = tsync)
 

@@ -54,11 +54,16 @@ ui <- fluidPage(
   titlePanel("Receiver QAQC"),
   sidebarLayout(
     sidebarPanel(width = 2,
+                 textInput("recorder", "Data recorder", placeholder = "Bob Booty"),
+                 textInput("study_code", "Study code", placeholder = "HECWL"),
+                 selectInput("tz", "Time Zone", c("", "Eastern", "Central")),
+                 textInput("test_tag", "Full test tag ID", placeholder = "A69-9002-1234"),
+                 textInput("VUE", "VUE version", placeholder = "3.1.2"),             
                  radioButtons(
                    inputId = "dtype",
                    label = "action:",
-                   choices = list("Download" = "down",
-                                  "Initialize" = "init"),
+                   choices = list("Download" = "download",
+                                  "Initialize" = "initialize"),
                    inline = TRUE),                 
                  fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = ".vrl"),
                  downloadButton("downloadData", "Download")
@@ -72,7 +77,7 @@ ui <- fluidPage(
                                   #tableOutput('data.table1') %>%
                                    DT::DTOutput('data.table1') %>%
                                      shinycssloaders::withSpinner(color="#0dc5c1", size = 1.5, type = 3, color.background = "white")),
-                          tabPanel("computer time sync",
+                          tabPanel("metadata",
                                    DT::DTOutput('clk') %>%
                                      shinycssloaders::withSpinner(color = "#0dc5c1", size = 1.5, type = 3, color.background = "white"), width = "50%", height = "50%")
                           )
@@ -95,6 +100,25 @@ ui <- fluidPage(
 server <- function(input, output, session) {
 
   
+
+
+  
+  metadata <- reactive({
+    data.table(field = c("Data recorder",
+                 "Study code",
+                 "Time Zone",
+                 "Full test tag ID",
+                 "VUE version"),
+               value = c(input$recorder,
+                         input$study_code,
+                         input$tz,
+                         input$test_tag,
+                         input$VUE))
+  }
+  )
+  
+  
+  
   # kill R session when browser or tab are closed. 
   session$onSessionEnded(stopApp)
 
@@ -109,7 +133,7 @@ server <- function(input, output, session) {
     if(is.null(input$file1)) return(NULL)
 #    print(glimpse(input$file1$datapath))
 #    print(glimpse(input$file1$name))
-    print(glimpse(input$file1))
+   # print(glimpse(input$file1))
     df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
     
  #   print(glimpse(olddf))
@@ -127,18 +151,18 @@ server <- function(input, output, session) {
   # https://shiny.rstudio.com/reference/shiny/1.0.5/downloadHandler.html
   output$downloadData <- downloadHandler(
     filename = function() {
-      paste0("receiver_download_", format(Sys.time(), "%Y-%m-%d_%H%M%S"), ".csv")
+      paste0(input$study_code, "_", input$dtype, "_", format(Sys.time(), "%Y-%m-%d_%H%M%S"), ".xlsx")
     },
     content = function(file) {
-            write.csv(foo(), file)
+      l <- list(detections = foo(), metadata = clk())
+      excel_QAQC(input = l, output = file)  
     }
   )
 
   # clock comparison
   clk <- reactive({
-    time_compare()
+    rbind(time_compare(), metadata())
   })
-  
   
   output$clk <- DT::renderDT({clk()}, escape = FALSE, server = TRUE)
 }
