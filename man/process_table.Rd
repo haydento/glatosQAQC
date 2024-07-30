@@ -17,15 +17,15 @@ process_table(
 \item{fls}{a character vector of files to include in report}
 
 \item{work_dir}{working directory where processing takes place
-fls <- c("/home/thayden/Desktop/VR2AR_546908_20230814_1.vrl", "/home/thayden/Desktop/VR2AR_547553_20230814_1.vrl")
-
-mrk_params = "/home/thayden/tools/vdat"
-work_dir = "C:/Users/thayden/Desktop"
-nme <- c("VR2AR_546908_20230814_1.vrl", "VR2AR_547553_20230814_1.vrl")
+fls <- c("~/Documents/VRL tests/VR2AR_546310_20190607_1.vrl", "~/Documents/VRL tests/VR2AR_546310_20220624_1.vrl", "~/Documents/VRL tests/VR2W_134214_20230626_1.vrl")
+mrk_params = "C:\\PROGRA~1\\vdat\\vdat.exe"
+work_dir = "~/Documents/"
+nme <- c("VR2AR_546310_20190607_1.vrl", "VR2AR_546310_20220624_1.vrl", "VR2W_134214_20230626_1.vrl")
 action <- "down"
 datapath = file.path(tempdir(), c("0.vrl", "1.vrl"))
-dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
-foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = "/home/thayden/Desktop")}
+dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params)
+
+foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = tempdir())}
 
 \item{params}{rmarkdown parameters needed to process data}
 }

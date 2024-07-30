@@ -6,17 +6,17 @@
 
 
 # if don't want to interactively choose files
-#' fls <- c("/home/thayden/Desktop/VR2AR_546908_20230814_1.vrl", "/home/thayden/Desktop/VR2AR_547553_20230814_1.vrl")
-#'
-#'
-#' mrk_params = "/home/thayden/tools/vdat"
-#' work_dir = "C:/Users/thayden/Desktop"
-#' nme <- c("VR2AR_546908_20230814_1.vrl", "VR2AR_547553_20230814_1.vrl")
+#' fls <- c("~/Documents/VRL tests/VR2AR_546310_20190607_1.vrl", "~/Documents/VRL tests/VR2AR_546310_20220624_1.vrl", "~/Documents/VRL tests/VR2W_134214_20230626_1.vrl")
+#' mrk_params = "C:\\PROGRA~1\\vdat\\vdat.exe"
+#' work_dir = "~/Documents/"
+#' nme <- c("VR2AR_546310_20190607_1.vrl", "VR2AR_546310_20220624_1.vrl", "VR2W_134214_20230626_1.vrl")
 #' action <- "down"
 #' datapath = file.path(tempdir(), c("0.vrl", "1.vrl"))
 
-##' dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = pth, temp_dir = "C:/Users/thayden/Desktop")
-#' foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = "/home/thayden/Desktop")
+#' dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params)
+#'
+#' 
+#' foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = tempdir())
 # https://stackoverflow.com/questions/52385295/get-the-name-of-an-uploaded-file-in-shiny
 
 #' @export
@@ -25,7 +25,7 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
 
   # convert vrls to csv format
   dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params, temp_dir = work_dir)
-
+  
   # extract vdat version used to extract data
   y <- function(x){attributes(x)$vdat_version}
   vdat_ver <- lapply(dtc, y)
@@ -45,7 +45,7 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
   file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
 
   # these next three lines are a work-around that re-establishes
-  # a link between original file name and internal file name that is automatically assigned when the files are uploaded to server.
+  # a link between original file name and internal file name that is automatically assigned when the files are uploaded to shiny server.
   # this is a bug.  Not sure why or how file names within file are changed to automatically assigned shiny names
   # behaviour is obvious when step through these lines starting browser from here...
   #browser()
@@ -59,20 +59,20 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
 
   # combine detection records and vdat version info
   out <- merge(out, vdat_ver, by = "file", all.x = TRUE)
-  
+
   ## # extract receiver battery info
-  ## bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
+#   bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
   
   ## # validate and assign vdat_bat class
-  ## bat <- glatosQAQC::vdat_bat(bat)
+ #  bat <- glatosQAQC::vdat_bat(bat)
 
   
   ## # Process battery records to summarize first and last voltages
-  ## bat <- glatosQAQC::process_detections_battery(bat)
+  # bat <- glatosQAQC::process_detections_battery(bat)
 
     
   ## # combine
-  ## out <- merge(out, bat, by = "file", all.x = TRUE)
+   #out <- merge(out, bat, by = "file", all.x = TRUE)
 
   # extract receiver map info for the receiver (in CFG_CHANNEL) 
   rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")
@@ -104,13 +104,13 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
   out <- merge(out, event, by = "file", all.x = TRUE)
   
   
-# need firmware version, memory remaining%, total detections, model
+# extract firmware version, memory remaining%, total detections, model
   
   # firmware = event_init
-
+  #browser()
   new_stats <- glatosQAQC::extract_records(vdat = dtc, type = "EVENT_OFFLOAD")
-  new_stats <- new_stats[, c("file", "Model", "PPM Total Accepted Detections", "Memory Remaining (%)")]
-  data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Memory Remaining (%)"), c("rec mod", "num det", "mem avail"))
+  new_stats <- new_stats[, c("file", "Model", "PPM Total Accepted Detections", "Memory Remaining (%)", "Battery Remaining (%)")]
+  data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Memory Remaining (%)", "Battery Remaining (%)"), c("rec mod", "num det", "mem avail", "battery (%)"))
 
   # extract event offload for the receivers
   #event_offload <- glatosQAQC::extract_records(vdat = dtc, type = "EVENT_OFFLOAD")
@@ -188,7 +188,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
   
   # combine objects
   out <- merge(out, tst, by = "file", all.x = TRUE)
-  
+
+  #browser()
   # fix names and formatting
   data.table::setnames(out, c("Time_first",
                               "Time_last",
@@ -240,7 +241,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
                  "int tag power",
                  "int tag min delay",
                  "int tag max delay",
-                 "vdat_ver"
+                 "vdat_ver",
+                 "battery (%)"
                  )
              ]   
 
@@ -261,7 +263,8 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
               `int tag power` = as.character(`int tag power`),
               `int tag min delay` = as.character(`int tag min delay`),
               `int tag max delay` = as.character(`int tag max delay`),
-              `vdat_ver` = as.character(`vdat_ver`)
+              `vdat_ver` = as.character(`vdat_ver`),
+              `battery (%)` = as.numeric(`battery (%)`)
               )
               ]
 
