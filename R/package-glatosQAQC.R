@@ -37,6 +37,7 @@ globalVariables(".")
 #package startup message
 .onAttach <- function(libname, pkgname) {
 
+  
   vdat <- get_local_vdat_version(vdat_exe_path = NULL)
   min_vdat = "3.4.0"
 

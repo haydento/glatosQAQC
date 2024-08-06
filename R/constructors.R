@@ -25,10 +25,15 @@
 ##   )
 ## }
 
+#' library(rvdat)
+#' vdat_template(format = "csv.fathom")
 
-vdat_dtc <- function(x){
+
+vdat_dtc <- function(x, template){
   stopifnot(is.data.table(x), is.data.frame(x))
-  colnames <- c("file", "Device Time (UTC)", "Time", "Time Offset (h)", "Time Correction (s)", "Model", "Serial Number", "Channel", "Detection Type", "Full ID", "ID", "Raw Data", "Transmitter Serial", "Signal Strength (dB)", "Noise (dB)", "Gain (dB)", "Quality Score", "Station Name", "Latitude", "Longitude", "GPS HDOP")
+  colnames = 
+
+  #colnames <- c("file", "Device Time (UTC)", "Time", "Time Offset (h)", "Time Correction (s)", "Mo#del", "Serial Number", "Channel", "Detection Type", "Full ID", "ID", "Raw Data", "Transmitter Seri#al", "Signal Strength (dB)", "Noise (dB)", "Gain (dB)", "Quality Score", "Station Name", "Latitude#", "Longitude", "GPS HDOP")
 
   missing_cols <- unique(setdiff(names(x), colnames))
   if (length(missing_cols) > 0) {

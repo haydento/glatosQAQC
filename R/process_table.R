@@ -6,12 +6,12 @@
 
 
 # if don't want to interactively choose files
-#' fls <- c("~/Documents/VRL tests/VR2AR_546310_20190607_1.vrl", "~/Documents/VRL tests/VR2AR_546310_20220624_1.vrl", "~/Documents/VRL tests/VR2W_134214_20230626_1.vrl")
-#' mrk_params = "C:\\PROGRA~1\\vdat\\vdat.exe"
+#' fls <- c("C:/Users/Admin/Documents/VRL tests/VR2AR_546310_20190607_1.vrl", "C:/Users/Admin/Documents/VRL tests/VR2AR_546310_20220624_1.vrl", "C:/Users/Admin/Documents/VRL tests/VR2W_134214_20230626_1.vrl")
+#' mrk_params = "C:\\Program Files\\vdat\\vdat.exe"
 #' work_dir = "~/Documents/"
-#' nme <- c("VR2AR_546310_20190607_1.vrl", "VR2AR_546310_20220624_1.vrl", "VR2W_134214_20230626_1.vrl")
+#' nme <- basename(fls)
 #' action <- "down"
-#' datapath = file.path(tempdir(), c("0.vrl", "1.vrl"))
+#' datapath = file.path(tempdir(), c("0.vrl", "1.vrl", "2.vrl"))
 
 #' dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params)
 #'
@@ -59,20 +59,6 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
 
   # combine detection records and vdat version info
   out <- merge(out, vdat_ver, by = "file", all.x = TRUE)
-
-  ## # extract receiver battery info
-#   bat <- glatosQAQC::extract_records(vdat = dtc, type = "BATTERY")
-  
-  ## # validate and assign vdat_bat class
- #  bat <- glatosQAQC::vdat_bat(bat)
-
-  
-  ## # Process battery records to summarize first and last voltages
-  # bat <- glatosQAQC::process_detections_battery(bat)
-
-    
-  ## # combine
-   #out <- merge(out, bat, by = "file", all.x = TRUE)
 
   # extract receiver map info for the receiver (in CFG_CHANNEL) 
   rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")

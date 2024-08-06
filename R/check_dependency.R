@@ -35,7 +35,8 @@ check_vdat <- function(vdat_exe_path = NULL){
     if(all(pths == "")) stop("VDAT.exe not found in system PATH ",
                                        "variable.", call. = FALSE)
   
-    vdat_call <- pths[pths != ""][1] 
+    vdat_call <- pths[pths != ""][1]
+    rvdat::vdat_here(vdat_call)
     
   } #else {
   

@@ -51,29 +51,41 @@
 #' v_path = c("C:/Program Files/Innovasea/Fathom/vdat.exe")
 #' temp_dir = tempdir()
 #' foo <- compile_vdats(vdat_files = vdat_files, v_path = v_path, temp_dir = temp_dir)
+#'
+#'
+#' vdat_files <- c("C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20190607_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20220624_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2W_134214_20230626_1.vrl")
+ 
+
+
 
 
 ##' @export
 
-compile_vdats <- function(vdat_files, v_path, temp_dir = tempdir()){
+#' vdat_files <- c("C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20190607_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20220624_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2W_134214_20230626_1.vrl")
+#' library(rvdat)
+#' library(data.table)
+#' vdat_here("C:/Program Files/Innovasea/Fathom Connect/vdat.exe")
+#'
+#'# must check for unity among tables from receivers.  Suspect I will need to use a schema with column types to do this.
+#' tst <- compile_vdats(vdat_files, tbls = c("DET.csv", "BATTERY.csv", "DATA_SOURCE_FILE.csv", "CLOCK_REF.csv", "EVENT_OFFLOAD.csv", "EVENT_INIT.csv"))
+#'
+#' 
+
+compile_vdats <- function(vdat_files, tbls = c("DET.csv", "BATTERY.csv")){
+  t_dir <- tempdir()
+  out_dirs <- file.path(t_dir, gsub("\\.vrl", ".csv-fathom-split", basename(fls)))
+  lapply(vdat_files, rvdat::vdat_to_csv, outdir = t_dir, time_corrected = TRUE, quiet = TRUE, folder = TRUE, filter = NULL)
+  ext_tbl <- lapply(tbls, function(x)file.path(out_dirs, x))
+  out <- vector(mode = "list", length = length(ext_tbl))
+  names(out) <- tbls
   
-#convert <- glatosQAQC::vrl_to_csv(vrl_file=vdat_files, out_dir = temp_dir, vdat_path = v_path, show_progress = FALSE)
-convert <- glatosQAQC::vrl_to_csv(vrl_file=vdat_files, out_dir = temp_dir, vdat_path = v_path)
-
-  fls <- convert$output_file
-
-  # extract data needed for report and save in a list
-  vdat <- vector("list", length(fls))
-  names(vdat) <- basename(fls)
-
-  # loop through and append to list
-  for(i in 1:length(fls)){
-    vdat[[i]] <- glatosQAQC::read_vdat_csv(src = fls[i]) 
+  for(i in 1:length(ext_tbl)){
+    out[[i]] <- rbindlist(lapply(ext_tbl[[i]], fread), fill = TRUE, idcol = "file")
   }
 
-sapply(fls, unlink)
+  unlink(out_dirs, recursive = TRUE)
   
-  return(vdat)
+  return(out)
 }
 
 
