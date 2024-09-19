@@ -36,7 +36,6 @@ check_vdat <- function(vdat_exe_path = NULL){
                                        "variable.", call. = FALSE)
   
     vdat_call <- pths[pths != ""][1]
-    rvdat::vdat_here(vdat_call)
     
   } #else {
   

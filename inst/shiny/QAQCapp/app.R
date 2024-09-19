@@ -134,7 +134,8 @@ server <- function(input, output, session) {
 #    print(glimpse(input$file1$datapath))
 #    print(glimpse(input$file1$name))
    # print(glimpse(input$file1))
-    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
+#    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
+    df <- glatosQAQC::process_table(fls = input$file1$datapath, action = tst,  work_dir = tempdir(), vdat_pth = vdat_call, nme = input$file1)
     
  #   print(glimpse(olddf))
  #   print(glimpse(df))

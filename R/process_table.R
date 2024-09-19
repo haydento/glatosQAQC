@@ -6,12 +6,33 @@
 
 
 # if don't want to interactively choose files
-#' fls <- c("C:/Users/Admin/Documents/VRL tests/VR2AR_546310_20190607_1.vrl", "C:/Users/Admin/Documents/VRL tests/VR2AR_546310_20220624_1.vrl", "C:/Users/Admin/Documents/VRL tests/VR2W_134214_20230626_1.vrl")
+#' fls <- list.files("~/Desktop", "*.vrl", full.names = TRUE, recursive = TRUE)[-1] 
+
+
+#'fls <- c("C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20190607_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20190607_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20220624_1.vrl", "C:/Users/Admin/Documents/VRL_tests/VR2W_134214_20230626_1.vrl")
+#' vdat_pth <- "C:/Program Files/Innovasea/Fathom Connect/vdat.exe" 
+#'
+#' #OffInitOn
+#' fls <- c("C:/Users/Admin/Desktop/SyncTest/OffInitOn/2024-08-21/NexTrak-R1 800305 2024-08-21 112645.vdat", "C:/Users/Admin/Desktop/SyncTest/OffInitOn/2024-08-21/VR2AR-69 548785 2024-08-21 112612.vdat", "C:/Users/Admin/Desktop/SyncTest/OffInitOn/2024-08-21/VR2AR-69 548785 2024-08-21 112612.vdat")
+#'
+#' #OffInitOnOff
+#' fls <- c("C:/Users/Admin/Desktop/SyncTest/OffInitOnOff/2024-08-21/NexTrak-R1 800305 2024-08-21 113003.vdat", "C:/Users/Admin/Desktop/SyncTest/OffInitOnOff/2024-08-21/VR2AR-69 548785 2024-08-21 112915.vdat", "C:/Users/Admin/Desktop/SyncTest/OffInitOnOff/2024-08-21/VR2Tx-69 483804 2024-08-21 113022.vdat")
+#'
+#'fls <- c("C:/Users/Admin/Desktop/SyncTest/OnInitOff/2024-08-21/NexTrak-R1 800305 2024-08-21 113630.vdat", "C:/Users/Admin/Desktop/SyncTest/OnInitOff/2024-08-21/VR2AR-69 548785 2024-08-21 113643.vdat", "C:/Users/Admin/Desktop/SyncTest/OnInitOff/2024-08-21/VR2Tx-69 483804 2024-08-21 113604.vdat")
+#'
+#'
+#' fls <- c("C:\\Users\\Admin\\Desktop\\SyncTest\\OnInitOffOn\\2024-08-21\\NexTrak-R1 800305 2024-08-21 113851.vdat", "C:\\Users\\Admin\\Desktop\\SyncTest\\OnInitOffOn\\2024-08-21\\VR2AR-69 548785 2024-08-21 113813.vdat", "C:\\Users\\Admin\\Desktop\\SyncTest\\OnInitOffOn\\2024-08-21\\VR2Tx-69 483804 2024-08-21 113934.vdat") 
+#'
+#' fls <- c("C:\\Users\\Admin\\Desktop\\SyncTest\\OnInitOffOnChange\\2024-08-21/NexTrak-R1 800305 2024-08-21 114305.vdat", "C:\\Users\\Admin\\Desktop\\SyncTest\\OnInitOffOnChange\\2024-08-21\\VR2AR-69 548785 2024-08-21 114233.vdat" , "C:\\Users\\Admin\\Desktop\\SyncTest\\OnInitOffOnChange\\2024-08-21\\VR2Tx-69 483804 2024-08-21 114324.vdat" )
+#'
+#' 
+#' vdat_pth <- "C:/Program Files/Innovasea/Fathom Connect/vdat.exe" 
+#' 
 #' mrk_params = "C:\\Program Files\\vdat\\vdat.exe"
 #' work_dir = "~/Documents/"
 #' nme <- basename(fls)
 #' action <- "down"
-#' datapath = file.path(tempdir(), c("0.vrl", "1.vrl", "2.vrl"))
+#' datapath = file.path(tempdir(), paste0(seq(0,length(fls)-1,1),".vrl"))
 
 #' dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params)
 #'
@@ -21,29 +42,38 @@
 
 #' @export
 
-process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, datapath = datapath){
+#process_table <- function(fls, vdat_pth, nme, action, work_dir = work_dir, datapath = datapath, schema = scheme()){
 
-  # convert vrls to csv format
-  dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params, temp_dir = work_dir)
+process_table <- function(fls, action, work_dir = work_dir, vdat_pth = vdat_call, nme){
+
+  #vdat_pth = glatosQAQC::check_vdat()
   
   # extract vdat version used to extract data
-  y <- function(x){attributes(x)$vdat_version}
-  vdat_ver <- lapply(dtc, y)
-  f_name <- sub(".csv", ".vrl", names(vdat_ver))
-  vdat_ver <- data.table(file = f_name, vdat = vdat_ver)
+  # this is displayed in output
+  shell_out <- sys::exec_internal(cmd = vdat_pth, args = "--version")
+  vdat_ver <- rawToChar(shell_out$stdout)
+  vdat_ver <- unlist(strsplit(vdat_ver, "\r?\n"))
+  
+  # extracts all vdat data into a directory of multiple csv files.  Returns a vector of local paths pointing to directories containing extracted data (csv files).  
+  dta <- lapply(fls, .vdat_compile, vdat_pth = vdat_pth )
 
-  # extract detection records for each file
-  det <- glatosQAQC::extract_records(vdat = dtc, type = "DET")
+  # read in data needed to make summary
 
-  # validate and assign vdat_dtc class
-  det <- glatosQAQC::vdat_dtc(det)
+  # get file information from within file
+  #file_id <- read_select_cols(dta_fls = dta, tbl = "DATA_SOURCE_FILE.csv", col_select = vdat_cols[["DATA_SOURCE_FILE"]])
+  file_id <- read_tbl(dta_fls = dta, tbl = "DATA_SOURCE_FILE.csv")
+  file_id <- lapply(file_id, as.data_source_file)
+  file_id <- rbindlist(file_id, idcol = "file")
+
+  # column classes have been definied and only columns needed for summary are extracted.
+  dtc <- read_tbl(dta_fls = dta, tbl = "DET.CSV")
+  dtc <- lapply(dtc, as.det)
+  dtc <- rbindlist(dtc, idcol = "file")
 
   # Process detection records to summarize first and last detections, and tags associated with detections
-  det <- glatosQAQC::process_detections(det)
+  dtc <- glatosQAQC::process_detections(dtc)
   
-  # extract file record from "DATA_SOURCE_FILE"
-  file_id <- glatosQAQC::extract_records(vdat = dtc, type = "DATA_SOURCE_FILE")
-
+################
   # these next three lines are a work-around that re-establishes
   # a link between original file name and internal file name that is automatically assigned when the files are uploaded to shiny server.
   # this is a bug.  Not sure why or how file names within file are changed to automatically assigned shiny names
@@ -52,128 +82,88 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
   
   nme_mod <- as.data.table(nme)
   nme_mod[, int_name := basename(datapath)]
-  file_id[nme_mod, `File Name` := nme_mod$name, on = .(file = int_name)]
+  file_id[nme_mod, `File Name` := nme_mod$name, on = .(`File Name` = int_name)]
+#################
   
   # combine detection records and file records
-  out <- merge(det, file_id, by = "file", all.x = TRUE)
+  out <- merge(dtc, file_id, by = "file", all.x = TRUE)
 
   # combine detection records and vdat version info
-  out <- merge(out, vdat_ver, by = "file", all.x = TRUE)
+  out[, vdat_version := vdat_ver]
 
-  # extract receiver map info for the receiver (in CFG_CHANNEL) 
-  rec_map <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_CHANNEL")
-
-  # extract only needed map info (rec map)
-  rec_map <- rec_map[, c("file", "Map ID")]
-  #data.table::setnames(rec_map, "Map ID", "rec map")
+  rec_map <- read_tbl(dta_fls = dta, tbl = "CFG_CHANNEL.csv")
+  rec_map <- lapply(rec_map, as.cfg_channel)
+  rec_map <- rbindlist(rec_map, idcol = "file")
 
   # combine
   out <- merge(out, rec_map, by = "file", all.x = TRUE)
 
   # extract clock info (offload time, initilization time) from clock ref table
-  new_event_offload <- glatosQAQC::extract_records(vdat = dtc, type = "CLOCK_REF")
-  new_rec_init_down <- data.table::dcast(new_event_offload, file ~ Source, value.var = c("Device Time (UTC)"))
+  clock_ref <- read_tbl(dta_fls = dta, tbl = "CLOCK_REF.csv")
+  clock_ref <- lapply(clock_ref, as.clock_ref)
+  clock_ref <- rbindlist(clock_ref, idcol = "file")
 
-  # nothing is written to vdat file if initialization or offload is messed up.  This next code block makes sure that table contains both "offload" and "initialization" columns.
-  req_cols <- c("file", "OFFLOAD", "INITIALIZATION")
-  col_difs <- setdiff(req_cols, names(new_rec_init_down))
-  if(length(col_difs) > 0){
-    # problem here...should not be integer type...
-    new_rec_init_down[, (col_difs) := as.POSIXct(NA, tz = "UTC")]
-  }
+  # this extracts receiver init/download times and computer time at download
+  # creates a wide table and renames columns
+  clock_ref <- data.table::dcast(clock_ref, file ~ Source, value.var = c("Time", "External Time (UTC)"))
+  setnames(clock_ref, c('Time_INITIALIZATION', 'Time_OFFLOAD', 'External Time (UTC)_INITIALIZATION', 'External Time (UTC)_OFFLOAD'), c("rec init", "rec download", "comp init", "comp download"))
 
-  new_comp_time <- data.table::dcast(new_event_offload[Source == "OFFLOAD",], file ~ Source, value.var = c("External Time (UTC)"))
-  data.table::setnames(new_comp_time, "OFFLOAD", "comp download")
-  event <- merge(new_rec_init_down, new_comp_time, by = "file", all = TRUE)
-
-# combine
-  out <- merge(out, event, by = "file", all.x = TRUE)
+# combine receiver initalization/download info
+  out <- merge(out, clock_ref, by = "file", all.x = TRUE)
   
-  
-# extract firmware version, memory remaining%, total detections, model
-  
+# extract firmware version, memory remaining%, total detections, model  
   # firmware = event_init
-  #browser()
-  new_stats <- glatosQAQC::extract_records(vdat = dtc, type = "EVENT_OFFLOAD")
-  new_stats <- new_stats[, c("file", "Model", "PPM Total Accepted Detections", "Memory Remaining (%)", "Battery Remaining (%)")]
-  data.table::setnames(new_stats, c("Model", "PPM Total Accepted Detections", "Memory Remaining (%)", "Battery Remaining (%)"), c("rec mod", "num det", "mem avail", "battery (%)"))
+  event_init <- read_tbl(dta_fls = dta, tbl = "EVENT_INIT.csv" )
+  event_init <- lapply(event_init, as.event_init)
+  event_init <- rbindlist(event_init, idcol = "file")
+  out <- merge(out, event_init, by = "file", all.x = TRUE)
 
-  # extract event offload for the receivers
-  #event_offload <- glatosQAQC::extract_records(vdat = dtc, type = "EVENT_OFFLOAD")
+  event_offload <- read_tbl(dta_fls = dta, tbl = "EVENT_OFFLOAD.csv")
+  event_offload <- lapply(event_offload, as.event_offload)
+  event_offload <- rbindlist(event_offload, idcol = "file")
 
-  # extract event info needed for report (rec num, computer download time, mem avail, num det, receiver download time)
-  #event_offload <- event_offload[, c("file", "Serial Number", "External Time (UTC)",
-   #                                  "Memory Remaining (%)",
-    #                                 "PPM Total Accepted Detections", "Device Time (UTC)")]
+  out <- merge(out, event_offload, by = "file", all.x = TRUE)
 
-  # extract firmware info.  Had to customize code because of missing column data in some later receivers
-
-  firmware <- lapply(dtc, "[[", "EVENT_INIT")
-  firmware <-  lapply(firmware, function(x){x[, c("Firmware Version", "Serial Number", "Time")]})
-  firmware <- data.table::rbindlist(firmware, idcol = "file")
-  firmware[, file := gsub(".csv", ".vrl", file, fixed = TRUE)]
-  alt_init <- firmware[,c("file", "Time")]
-  setnames(alt_init, "Time", "alt_init")
-  firmware[, Time := NULL]
-  data.table::setnames(firmware, c("Firmware Version", "Serial Number"), c("rec firmware", "rec num"))
-  new_stats <- merge(new_stats, firmware, by = "file", all = TRUE)
-
-  # combine
-  out <- merge(out, new_stats, by = "file", all.x = TRUE)
-  
   # extract integrated tag info
-  i_tag <- glatosQAQC::extract_records(vdat = dtc, type = "CFG_TRANSMITTER")
-  i_tag <- glatosQAQC::vdat_i_tag(i_tag)
-  i_tag <- i_tag[!is.na(Time),]
+  i_tag <- read_tbl(dta_fls = dta, tbl = "CFG_TRANSMITTER.csv")
+  i_tag <- lapply(i_tag, as.cfg_transmitter)
+  i_tag <- rbindlist(i_tag, idcol = "file")
 
-
-  # create null table if no recs have integrated tags
-  null_i_tag <- data.table( file = NA_character_, Time = as.POSIXct(NA, tz = "UTC"), `Power Level` = NA_character_, `Min Delay (s)` = NA_integer_, `Max Delay (s)` = NA_integer_, `Full ID` = NA_character_)
-
+  # works to here.  Need to figure out how to summarize i_tag data.
+  # records for integrated tag are not restricted to initialization and download with the exception of all i_tag changes must occur after initialization and before the next future initialization.
+  # for the QAQC, only look at status between init and download and report the setting with the longest duration during this time period.
+  # for HBBS protocol, this duration is the only event possible (i.e., should be no partial downloads
+  # changes in i_tag power after download but before the next initialization are not considered.
+  
+###################################
   
   if(nrow(i_tag) > 0){
-    
-    setkey(i_tag, Time, file)
-    i_tag$start <- i_tag$Time  
-    i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"]
-    i_tag[, n_row := .N, by = "file"]
-    i_tag[n_row == 1, end := Sys.time()]
-    i_tag <- i_tag[ !is.na(end),]
-    
-    # simplify events for dev (no NA init)
-    #event <- event[1,]
-    #  ark <- event
-    #  ark_i_tag <- i_tag
-    #  ark_event <- event
-  
-    event <- alt_init[event, on = "file",]
-    event[,`:=`(start = `INITIALIZATION`, end = `comp download`)]
-    event[is.na(start), start := alt_init]
-    
-    # event <- event[!is.na(start),]
-    setkey(event, file, start, end)
-    setkey(i_tag, file, start, end)
-    tst <- foverlaps(event, i_tag)
-    
-    tst[, duration := as.numeric(lubridate::as.duration(lubridate::intersect(lubridate::interval(start, end), lubridate::interval(i.start, i.end))))]
-    
-    # extract receivers that don't have integrated tag or NA in duration column
-    tst <- tst[!is.na(duration),]
 
-    # find maximum for each
-    tst <- tst[tst[!is.na(duration), .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
+    i_tag <- i_tag[!is.na(CFG_TRANSMITTER_DESC),]    
+    setkey(i_tag, file, Time)
+    i_tag$start <- i_tag$Time
+    i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"] #11
+
+    event <- out[!is.na(`comp init`), c("file", "comp init", "comp download")] #23
     
-    if(nrow(tst) == 0){
-      tst <- null_i_tag
-    }
-    
+    i_tag <- event[i_tag, on = "file"]
+    i_tag[is.na(end), end := `comp download`]
+    i_tag <- i_tag[, duration := difftime(end, start, units = "secs")]
+    i_tag <- i_tag[i_tag[, .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Min Delay (s)", "Max Delay (s)", "Full ID")]
+
   } else {
-
-    tst <- null_i_tag
+    i_tag <- data.table(file = NA_character_,
+                        Time = as.POSIXct(NA, tz = "UTC"),
+                        `Power Level` = NA_character_,
+                        `Min Delay (s)` = NA_integer_,
+                        `Max Delay (s)` = NA_integer_,
+                        `Full ID` = NA_character_)
   }
   
+  
+    
   # combine objects
-  out <- merge(out, tst, by = "file", all.x = TRUE)
+  out <- merge(out, i_tag, by = "file", all.x = TRUE)
 
   #browser()
   # fix names and formatting
@@ -187,9 +177,14 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
                               "Min Delay (s)",
                               "Max Delay (s)",
                               "Map ID",
-                              "INITIALIZATION",
-                              "OFFLOAD",
-                              "vdat"),
+                              "vdat_version",
+                              "Serial Number",
+                              "Model",
+                              "Firmware Version",
+                              "PPM Total Accepted Detections",
+                              "Battery Remaining (%)",
+                              "File Name"
+                              ),
                        c("first det",
                          "last det",
                          "first tag",
@@ -200,17 +195,21 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
                          "int tag min delay",
                          "int tag max delay",
                          "rec map",
-                         "rec init",
-                         "rec download",
-                         "vdat_ver"
-                         ))
+                         "vdat_ver",
+                         "rec num",
+                         "rec mod",
+                         "rec firmware",
+                         "num det",
+                         "battery (%)",
+                         "OG source"
+                        ))
 
   # round memory available column to 1 digit
-  out[, "mem avail" := round(out$'mem avail', 1)]
+  out[, `mem avail` := round(out$`Memory Remaining (%)`, 1)]
 
 
   # prepare data for export
-  out <- out[, c("File Name",
+  out <- out[, c("OG source",
                  "rec num",
                  "rec mod",
                  "rec firmware",
@@ -233,26 +232,27 @@ process_table <- function(fls, mrk_params, nme, action, work_dir = work_dir, dat
              ]   
 
   # enforce data output types
-  out[, `:=` (`rec num` = as.numeric(`rec num`),
+  out[, `:=` (`OG source` = as.character(`OG source`),
+              `rec num` = as.integer(`rec num`),
               `rec mod` = as.character(`rec mod`),
               `rec firmware` = as.character(`rec firmware`),
               `rec map` = as.character(`rec map`),
-              `mem avail` = as.numeric(`mem avail`),
+              `mem avail` = as.integer(`mem avail`),
               `rec init` = as.POSIXct(`rec init`, tz = "UTC"),
               `rec download` = as.POSIXct(`rec download`, tz = "UTC"),
               `comp download` = as.POSIXct(`comp download`, tz = "UTC"),
               `first det` = as.POSIXct(`first det`, tz = "UTC"),
               `last det` = as.POSIXct(`last det`, tz = "UTC"),
-              `num det` = as.numeric(`num det`),
+              `num det` = as.integer(`num det`),
               `int tag init` = as.POSIXct(`int tag init`, tz = "UTC"),
               `int tag ID` = as.character(`int tag ID`),
               `int tag power` = as.character(`int tag power`),
-              `int tag min delay` = as.character(`int tag min delay`),
-              `int tag max delay` = as.character(`int tag max delay`),
+              `int tag min delay` = as.integer(`int tag min delay`),
+              `int tag max delay` = as.integer(`int tag max delay`),
               `vdat_ver` = as.character(`vdat_ver`),
-              `battery (%)` = as.numeric(`battery (%)`)
+              `battery (%)` = as.integer(`battery (%)`)
               )
-              ]
+      ]
 
   # add in file name info to output table
   # order of records are not same.  THis causes a mismatch of rows with receivers.

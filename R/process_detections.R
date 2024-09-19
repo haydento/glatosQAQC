@@ -1,5 +1,4 @@
-##' utility function that extracts and summarizes receiver download data needed to produce download report
-##'
+##' utility function that extracts and summarizes receiver download data needed to produce download report##'
 ##' 
 ##' @param input data.table produced by \code{extract_records}
 ##' @param battery boolean, set battery = TRUE when processing records for battery voltage
@@ -56,7 +55,7 @@
 process_detections <- function(input){
 
   # stop if not correct class
-  stopifnot(all(class(input) %in% c("vdat_dtc", "data.table", "data.frame")))
+#  stopifnot(all(class(input) %in% c("vdat_dtc", "data.table", "data.frame")))
 
     
   
