@@ -15,33 +15,6 @@ library(data.table)
 options(shiny.maxRequestSize = 20*1024^2) 
 
 
-# determine OS and set vdat call
-#os <- Sys.info()['sysname']
-
-#if(os == "Linux"){
-#  vdat_call <- system.file("exec/vdat_linux", package = "glatosQAQC")}
-
-# if vdat is installed on windows machine via FATHOM, then use it instead of older version bundled with package
-#if(os == "Windows"){
-
- # if(!is.na(vdat_call)){message("using FATHOM vdat.exe")}
- # if(is.na(vdat_call)){message("using packaged vdat.exe")}
-
- # if(is.na(vdat_call)){
- #   vdat_call <- system.file("exec/vdat.exe", package = "glatosQAQC")
- # }
-
-#}
-
- 
-
-#if(os == "Darwin"){
-#  vdat_call <- system.file("exec/vdat_mac", package = "glatosQAQC")}
-
-## if(!is.null(vdat_call)){
-##     vdat_call <-  normalizePath(vdat_call)
-## }
-
 vdat_call <- normalizePath(check_vdat())
 
 
@@ -54,7 +27,7 @@ ui <- fluidPage(
   titlePanel("Receiver QAQC"),
   sidebarLayout(
     sidebarPanel(width = 2,
-                 textInput("recorder", "Data recorder", placeholder = "Bob Booty"),
+                 textInput("recorder", "Data recorder", placeholder = "Bob Record"),
                  textInput("study_code", "Study code", placeholder = "HECWL"),
                  selectInput("tz", "Time Zone", c("", "Eastern", "Central")),
                  textInput("test_tag", "Full test tag ID", placeholder = "A69-9002-1234"),
@@ -65,7 +38,7 @@ ui <- fluidPage(
                    choices = list("Download" = "download",
                                   "Initialize" = "initialize"),
                    inline = TRUE),                 
-                 fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = ".vrl"),
+                 fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = c(".vdat", ".vrl")),
                  downloadButton("downloadData", "Download")
                  
                  ),
@@ -99,10 +72,6 @@ ui <- fluidPage(
 # https://stackoverflow.com/questions/59449396/change-pagetype-in-dt-pagination-in-r-shiny-module
 server <- function(input, output, session) {
 
-  
-
-
-  
   metadata <- reactive({
     data.table(field = c("Data recorder",
                  "Study code",
@@ -121,9 +90,7 @@ server <- function(input, output, session) {
   
   # kill R session when browser or tab are closed. 
   session$onSessionEnded(stopApp)
-
   df_all <- reactiveVal(NULL)
-
  
 #output$data.table1 <- DT::renderDT({
   foo <-reactive({
@@ -135,10 +102,10 @@ server <- function(input, output, session) {
 #    print(glimpse(input$file1$name))
    # print(glimpse(input$file1))
 #    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
-    df <- glatosQAQC::process_table(fls = input$file1$datapath, action = tst,  work_dir = tempdir(), vdat_pth = vdat_call, nme = input$file1)
-    
+    df <- glatosQAQC::process_table(fls = input$file1, action = tst, work_dir = tempdir(), vdat_pth = vdat_call)
  #   print(glimpse(olddf))
- #   print(glimpse(df))
+    #  print(glimpse(df))
+   # print(glimpse(input$file1))
     df <- dplyr::bind_rows(olddf, df)
     isolate(df_all(df))
     return(df)

@@ -255,14 +255,15 @@ as.event_offload <- function(x){
   if(is.null(x[[1]])){
     x <- data.table(`PPM Total Accepted Detections` = NA_integer_,
                     `Memory Remaining (%)` = NA_integer_,
-                    `Battery Remaining (%)` = NA_integer_)
+                    `Battery Remaining (%)` = NA_integer_,
+                    `Original File` = NA_character_)
     return(x)
   }
 
   stopifnot(is.data.table(x), is.data.frame(x))
 
   # required column names
-  req_cols <- c("PPM Total Accepted Detections", "Memory Remaining (%)", "Battery Remaining (%)")
+  req_cols <- c("PPM Total Accepted Detections", "Memory Remaining (%)", "Battery Remaining (%)", "Original File")
   #missing_cols <- unique(setdiff(names(x), colnames))
   missing_cols <- unique(setdiff(req_cols, names(x)))
 
@@ -284,6 +285,11 @@ as.event_offload <- function(x){
   for(col in set_int)
     set(x, j = col, value = as.integer(x[[col]]))
 
+  # set character columns
+  set_char <- c("Original File")
+  for(col in set_char)
+    set(x, j = col, value = as.character(x[[col]]))
+  
 #Assign class
   x <- structure(x, 
                  class = c("event_offload", class(x)))

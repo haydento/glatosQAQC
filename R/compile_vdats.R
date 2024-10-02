@@ -3,13 +3,10 @@
 ##' Converts vrl to csv using Innovasea vdat command line utility.
 ##'
 ##' @param vdat_file a character vector of one or more file paths pointing to the vrl files that will be extracted
-##' @param outdir character vector of where files will be saved after extraction.  Default is temporary directory
+##' @param vdat_pth file path to vdat.exe executable
 ##' @return A list object that contains file path to directory containing all csv files extracted from vrl in \code{vdat_files}  
 ##' @author Todd Hayden
 
-##' @examples
-
-#' @export
 
 #' fls <- c("C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20190607_1.vrl",
 #'         "C:/Users/Admin/Documents/VRL_tests/VR2AR_546310_20190607_1.vrl",
@@ -23,37 +20,58 @@
 #' Multiple files extracted simultaneously:
 #' tst <- lapply(fls, .vdat_compile)
 
-.vdat_compile <- function(vdata_file,
-                          vdat_pth = NULL) {
-  if(is.null(vdat_pth)){
-    vdat_pth = glatosQAQC::check_vdat()
-  }
+## .vdat_compile <- function(vdata_file,
+##                           vdat_pth = NULL) {
+##   if(is.null(vdat_pth)){
+##     vdat_pth = glatosQAQC::check_vdat()
+##   }
 
-    out_dir <- tempfile()
-    dir.create(out_dir)
+##     #out_dir <- tempfile()
+##     #dir.create(out_dir)
+    
+##     ## Convert function arguments
+##     vdat_args <- c(
+##       "convert",
+##       "--format=csv.fathom",
+##       vdata_file,
+##      # paste0("--output=", out_dir),
+##       "--timec=default"
+##     )
+    
+##     ## filename <- gsub(
+##     ##   "vdat|vrl",
+##     ##   #"csv-fathom-split",
+##     ##   "csv.fathom"
+##     ##   basename(vdata_file)
+##     ## )
+
+##     #time_shell_out <- format(Sys.time(), "[%s]")
+##     shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = FALSE)
+    
+##     # Handle error
+##     #if (shell_out$status == 1) {
+##      # stop(shell_out$stderr)    
+##     #}
+##   #out <- file.path(out_dir, filename)
+##   vdata_file
+##     return(vdata_file)
+## }
+
+
+#' @export
+
+.compile <- function(vdata_file, vdat_pth){
     
     ## Convert function arguments
     vdat_args <- c(
       "convert",
-      "--format=csv.fathom.split",
+      "--format=csv.fathom",
       vdata_file,
-      paste0("--output=", out_dir),
+     # paste0("--output=", out_dir),
       "--timec=default"
     )
     
-    filename <- gsub(
-      "vdat|vrl",
-      "csv-fathom-split",
-      basename(vdata_file)
-    )
-
-    time_shell_out <- format(Sys.time(), "[%s]")
-    shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = FALSE)
-    
-    # Handle error
-    if (shell_out$status == 1) {
-      stop(shell_out$stderr)    
-    }
-    out <- file.path(out_dir, filename)
-    return(out)
+  #time_shell_out <- format(Sys.time(), "[%s]")
+  shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = FALSE)  
+  return(vdata_file)
 }

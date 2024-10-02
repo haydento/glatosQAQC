@@ -2,7 +2,7 @@
 % Please edit documentation in R/process_detections.R
 \name{process_detections}
 \alias{process_detections}
-\title{utility function that extracts and summarizes receiver download data needed to produce download report}
+\title{utility function that extracts and summarizes receiver download data needed to produce download report##'}
 \usage{
 process_detections(input)
 }
@@ -15,7 +15,7 @@ process_detections(input)
 processed data frame
 }
 \description{
-utility function that extracts and summarizes receiver download data needed to produce download report
+utility function that extracts and summarizes receiver download data needed to produce download report##'
 }
 \examples{
 

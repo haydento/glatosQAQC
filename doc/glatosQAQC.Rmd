@@ -59,8 +59,7 @@ name of output files.  Basic use of function is outlined below:
 
 library(glatosQAQC)
 
-make_report(output_dir = "~/Desktop", output_file = "my_report.html")
- 
+QAQCapp() 
  }
 
 

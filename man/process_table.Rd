@@ -6,28 +6,20 @@
 \usage{
 process_table(
   fls,
-  mrk_params,
-  nme,
   action,
   work_dir = work_dir,
-  datapath = datapath
+  vdat_pth = glatosQAQC::check_vdat()
 )
 }
 \arguments{
-\item{fls}{a character vector of files to include in report}
-
-\item{work_dir}{working directory where processing takes place
-fls <- c("~/Documents/VRL tests/VR2AR_546310_20190607_1.vrl", "~/Documents/VRL tests/VR2AR_546310_20220624_1.vrl", "~/Documents/VRL tests/VR2W_134214_20230626_1.vrl")
-mrk_params = "C:\\PROGRA~1\\vdat\\vdat.exe"
-work_dir = "~/Documents/"
-nme <- c("VR2AR_546310_20190607_1.vrl", "VR2AR_546310_20220624_1.vrl", "VR2W_134214_20230626_1.vrl")
+\item{fls}{a character vector of files to include in report
+fls <- list.files("~/Desktop", "*.vrl", full.names = TRUE, recursive = TRUE)\link{2:5}
+vdat_pth =  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
+work_dir = tempdir()
+nme <- paste0(seq(0,length(fls)-1,1),".vrl")
 action <- "down"
-datapath = file.path(tempdir(), c("0.vrl", "1.vrl"))
-dtc <- glatosQAQC::compile_vdats(vdat_files = fls, v_path = mrk_params)
-
-foo <-  process_table(fls = fls, mrk_params = mrk_params, nme = nme, action = action, datapath = datapath, work_dir = tempdir())}
-
-\item{params}{rmarkdown parameters needed to process data}
+fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
+fls <- "C:/Users/Admin/Desktop/test vrls/test vrls/nextrac.vdat"}
 }
 \description{
 Compiles data from all receivers, generates table of data included in report.
