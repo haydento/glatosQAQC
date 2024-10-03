@@ -27,7 +27,7 @@ ui <- fluidPage(
   titlePanel("Receiver QAQC"),
   sidebarLayout(
     sidebarPanel(width = 2,
-                 textInput("recorder", "Data recorder", placeholder = "Bob Record"),
+                 textInput("recorder", "Data recorder", placeholder = "Bob Smith"),
                  textInput("study_code", "Study code", placeholder = "HECWL"),
                  selectInput("tz", "Time Zone", c("", "Eastern", "Central")),
                  textInput("test_tag", "Full test tag ID", placeholder = "A69-9002-1234"),
@@ -102,7 +102,7 @@ server <- function(input, output, session) {
 #    print(glimpse(input$file1$name))
    # print(glimpse(input$file1))
 #    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
-    df <- glatosQAQC::process_table(fls = input$file1, action = tst, work_dir = tempdir(), vdat_pth = vdat_call)
+    df <- glatosQAQC::process_table(fls = input$file1, action = tst, vdat_pth = vdat_call)
  #   print(glimpse(olddf))
     #  print(glimpse(df))
    # print(glimpse(input$file1))

@@ -1,30 +1,55 @@
-##' Compiles data from all receivers, generates table of data included in report.
+# .compile function calls vdat utility to open each vrl, convert each file to an interleaved .csv files containing all the data stored on the receiver. Converts vrl to csv using Innovasea vdat command line utility.
+
+.compile <- function(vdata_file, vdat_pth){
+    
+    ## Convert function arguments
+    vdat_args <- c(
+      "convert",
+      "--format=csv.fathom",
+      vdata_file,
+     # paste0("--output=", out_dir),
+      "--timec=default"
+    )
+    
+  #time_shell_out <- format(Sys.time(), "[%s]")
+  shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = FALSE)  
+  return(vdata_file)
+}
+
+
+# Internal function for extracting tables from vrl files
+
+ read_dta_lst <- function(src, record_types = c("DET", "DATA_SOURCE_FILE", "CFG_CHANNEL", "CLOCK_REF", "EVENT_INIT", "EVENT_OFFLOAD", "CFG_TRANSMITTER")
+                           ){
+    vdat_txt <- data.table::fread(file = src, skip = 2, header = FALSE, sep = NULL, col.names = "txt")
+
+    vdat_txt[, `:=`(record_type, data.table::fread(file = src, skip = 2, header = FALSE, sep = ",", select = 1, fill = TRUE))]
+    vdat_txt[, `:=`(record_type, gsub("_DESC$", "", record_type))]
+    vdat_txt <- vdat_txt[record_type %in% record_types,]
+    vdat_list <- split(vdat_txt, by = "record_type", keep.by = FALSE)
+    vdat_list <- lapply(vdat_list, function(x) {fread(text = paste0(c(x$txt,""), collapse = "\n"), sep = ",", na.strings = "", colClasses = "character", header = TRUE, drop = 1)})
+
+    return(vdat_list)
+  }
+
+
+##' Compiles output data from all receiver log files, creates table used in output report
 ##' 
-##' @param fls a character vector of files to include in report
+##' @param fls data.frame of produced from shiny::fileInput that contains name, size, type, datapath for each receiver selected by user
+##' @param action User selected radio button for "download" and "initialize" included in output table
+##' @param vdat_pth Path to vdat executable installed on your computer
+##'
+##' @returns returns table of diagnostic  metrics extracted from each receiver
 
-# if don't want to interactively choose files
-#' fls <- list.files("~/Desktop", "*.vrl", full.names = TRUE, recursive = TRUE)[2:5] 
-#' vdat_pth =  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe" 
-#' work_dir = tempdir()
-#' nme <- paste0(seq(0,length(fls)-1,1),".vrl")
-#' action <- "down"
-# https://stackoverflow.com/questions/52385295/get-the-name-of-an-uploaded-file-in-shiny
-
-
-#process_table <- function(fls, vdat_pth, nme, action, work_dir = work_dir, datapath = datapath, schema = scheme()){
-
-
-#' fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
-
-#' fls <- "C:/Users/Admin/Desktop/test vrls/test vrls/nextrac.vdat"
-
-#.compile(fls, glatosQAQC::check_vdat())
-#fls_csv <- gsub(".vdat", ".csv", fls)
-#foo <- read_dta_lst(src = fls_csv) 
-#dta <- lapply(dta, read_dta_lst)
-
+##' @examples
+##' \dontrun{
+##' # datapath below  must direct to actual files vrl/vdat files.  When data are uploaded by shiny, original file name is changed internally (i.e., 0.vrl, 1.vrl) and renamed file is in "name" column.
+# fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
+##' # process_table(fls = fls, action = "download", vdat_pth = glatosQAQC::check_vdat())
+##' }
+##'
 ##' @export
-process_table <- function(fls, action, work_dir = work_dir, vdat_pth = glatosQAQC::check_vdat()){
+process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
   
  # extract vdat version used to extract data
   # this is displayed in output
@@ -39,11 +64,8 @@ process_table <- function(fls, action, work_dir = work_dir, vdat_pth = glatosQAQ
   fls[, vdat_version := vdat_ver]
 
   #fwrite(fls, "~/Desktop/check.csv")
-  #' fls <- fread("~/Desktop/check.csv")
-  
-  # extracts single interleaved file from   Returns a vector of local paths pointing to directories containing extracted data (csv files).
-
-  vdat_pth = glatosQAQC::check_vdat()
+  # fls <- fread("~/Desktop/check.csv")
+  #vdat_pth = glatosQAQC::check_vdat()
   
   dta <- lapply(as.list(fls$datapath), .compile, vdat_pth = vdat_pth )
   foo <- lapply(dta, function(x){(fls[fls$datapath %in% x, ]$hash)})
@@ -52,21 +74,7 @@ process_table <- function(fls, action, work_dir = work_dir, vdat_pth = glatosQAQ
  # browser()
   dta <- lapply(dta, function(x) {gsub(pattern = "\\.(vrl|vdat)$", x = x, replacement = ".csv")})
   
-  read_dta_lst <- function(src, record_types = c("DET", "DATA_SOURCE_FILE", "CFG_CHANNEL", "CLOCK_REF", "EVENT_INIT", "EVENT_OFFLOAD", "CFG_TRANSMITTER")
-                           ){
-    vdat_txt <- data.table::fread(file = src, skip = 2, header = FALSE, sep = NULL, col.names = "txt")
-
-    vdat_txt[, `:=`(record_type, data.table::fread(file = src, skip = 2, header = FALSE, sep = ",", select = 1, fill = TRUE))]
-    vdat_txt[, `:=`(record_type, gsub("_DESC$", "", record_type))]
-    vdat_txt <- vdat_txt[record_type %in% record_types,]
-    vdat_list <- split(vdat_txt, by = "record_type", keep.by = FALSE)
-    vdat_list <- lapply(vdat_list, function(x) {fread(text = paste0(c(x$txt,""), collapse = "\n"), sep = ",", na.strings = "", colClasses = "character", header = TRUE, drop = 1)})
-
-    return(vdat_list)
-  }
-
-
-dta <- lapply(dta, read_dta_lst)
+  dta <- lapply(dta, read_dta_lst)
 
 #dta <- lapply(dta, glatos::read_vdat_csv)
   
@@ -81,7 +89,7 @@ dta <- lapply(dta, read_dta_lst)
     }
 
 #  saveRDS(dta, "~/Desktop/check.rds")
-  #'dta <- readRDS("~/Desktop/check.rds")
+  #dta <- readRDS("~/Desktop/check.rds")
  
   # Process detection records to summarize first and last detections, and tags associated with detections
   dtc <- glatosQAQC::process_detections(rbindlist(lapply(dta, "[[", "DET"), idcol = "file"))
@@ -166,9 +174,8 @@ dta <- lapply(dta, read_dta_lst)
 
   out <- i_tag[out, on = .(file)] 
 
-
    #write.fst(i_tag, "~/Desktop/i_tag.fst")
-    fst::write.fst(out, "~/Desktop/out.fst")
+    #fst::write.fst(out, "~/Desktop/out.fst")
  # fwrite(out, "~/Desktop/check.csv")
  
 ##   # fix names and formatting

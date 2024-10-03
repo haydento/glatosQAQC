@@ -2,25 +2,27 @@
 % Please edit documentation in R/process_table.R
 \name{process_table}
 \alias{process_table}
-\title{Compiles data from all receivers, generates table of data included in report.}
+\title{Compiles output data from all receiver log files, creates table used in output report}
 \usage{
-process_table(
-  fls,
-  action,
-  work_dir = work_dir,
-  vdat_pth = glatosQAQC::check_vdat()
-)
+process_table(fls, action, vdat_pth = glatosQAQC::check_vdat())
 }
 \arguments{
-\item{fls}{a character vector of files to include in report
-fls <- list.files("~/Desktop", "*.vrl", full.names = TRUE, recursive = TRUE)\link{2:5}
-vdat_pth =  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
-work_dir = tempdir()
-nme <- paste0(seq(0,length(fls)-1,1),".vrl")
-action <- "down"
-fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
-fls <- "C:/Users/Admin/Desktop/test vrls/test vrls/nextrac.vdat"}
+\item{fls}{data.frame of produced from shiny::fileInput that contains name, size, type, datapath for each receiver selected by user}
+
+\item{action}{User selected radio button for "download" and "initialize" included in output table}
+
+\item{vdat_pth}{Path to vdat executable installed on your computer}
+}
+\value{
+returns table of diagnostic  metrics extracted from each receiver
 }
 \description{
-Compiles data from all receivers, generates table of data included in report.
+Compiles output data from all receiver log files, creates table used in output report
+}
+\examples{
+\dontrun{
+# datapath below  must direct to actual files vrl/vdat files.  When data are uploaded by shiny, original file name is changed internally (i.e., 0.vrl, 1.vrl) and renamed file is in "name" column.
+# process_table(fls = fls, action = "download", vdat_pth = glatosQAQC::check_vdat())
+}
+
 }

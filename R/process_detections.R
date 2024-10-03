@@ -1,7 +1,6 @@
 ##' utility function that extracts and summarizes receiver download data needed to produce download report##'
 ##' 
 ##' @param input data.table produced by \code{extract_records}
-##' @param battery boolean, set battery = TRUE when processing records for battery voltage
 ##'
 ##' @return processed data frame
 ##' @author Todd Hayden
@@ -27,28 +26,6 @@
 ##' @export
 ##' @import data.table
 
-
-## process_detections <- function(input){
-
-##   # copy inputs for data.table
-##   dtc <- copy(input)
-
-##   # extract first and last rows of detections
-##   # and format
-    
-##     # extract first and last detections for each receiver
-##     data.table::setkey(dtc, file, `Device Time (UTC)`)
-##     dtc <- dtc[, .SD[c(1,.N),], by = .(file)]
-
-##     # assign first and last designators
-##     setkey(dtc, file, `Device Time (UTC)`)
-##     dtc[, dtc_order := c("first_detect", "last_detect"), by = .(file)]
-
-##   # create wide table of first and last detections
-##   dtc <- dcast(dtc, file ~ dtc_order, value.var = c("Device Time (UTC)", "Full ID"))
-
-##   return(dtc)
-## }
 
 
 

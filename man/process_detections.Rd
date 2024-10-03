@@ -8,8 +8,6 @@ process_detections(input)
 }
 \arguments{
 \item{input}{data.table produced by \code{extract_records}}
-
-\item{battery}{boolean, set battery = TRUE when processing records for battery voltage}
 }
 \value{
 processed data frame

@@ -20,21 +20,20 @@ issue at \url{github.com/haydento/glatosQAQC} or email thayden@usgs.gov (maintai
 Package is hosted on GitHub and can be installed automatically via \code{install_github} function in the \code{remotes} package.
 If you do not have \code{devtools} installed on your machine, first run \code{install.packages("remotes")} in a R terminal.  After package \code{remotes} is installed, run \code{devtools::install_github("haydento/glatosQAQC")} to install \code{glatosQAQC}.
 
-\emph{A recent version of Fathom Connect software (Innovasea) must be installed for \code{glatosQAQC} to work.  Fathom Connect can be downloaded at \url{https://support.fishtracking.innovasea.com/s/downloads}
+\emph{A recent version of Fathom Connect software (Innovasea) must be installed for \code{glatosQAQC} to work.  Fathom Connect can be downloaded at \url{https://support.fishtracking.innovasea.com/s/downloads}}
 }
 
 \section{Typical Use}{
 
-\cr
+
 \emph{\code{glatosQAQC} consists of an interactive GUI that enables the user to open and extract summary data from one or more acoustic receiver log files (*.vrl) stored on your computer.}
+
 To use run the following code in a R terminal:
 \enumerate{
 \item \code{library(glatosQAQC)}
-\cr
 \item \code{QAQCapp()}
-\cr
-\cr
-This will open a separate window in your default browser that allows selection of .vrl files.  Once files are selected, a summary table will be generated.
 }
+
+This will open a separate window in your default browser that allows selection of .vrl files.  Once files are selected, a summary table will be generated.
 }
 
