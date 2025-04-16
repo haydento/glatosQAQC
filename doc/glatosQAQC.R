@@ -1,9 +1,14 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
 
-## ----setup--------------------------------------------------------------------
-library(glatosQAQC)
+## ----eval = FALSE-------------------------------------------------------------
+# 
+# # load glatosQAQC package
+# library(glatosQAQC)
+# 
+# # start app
+# QAQCapp()
 

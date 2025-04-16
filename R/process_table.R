@@ -1,5 +1,10 @@
 # .compile function calls vdat utility to open each vrl, convert each file to an interleaved .csv files containing all the data stored on the receiver. Converts vrl to csv using Innovasea vdat command line utility.
 
+
+vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2W_109506_20210723_1.vrl"
+vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2AR_546310_20220624_1.vrl"
+vdat_pth <-  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
+out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
 .compile <- function(vdata_file, vdat_pth){
     
     ## Convert function arguments
@@ -7,7 +12,7 @@
       "convert",
       "--format=csv.fathom",
       vdata_file,
-     # paste0("--output=", out_dir),
+      #paste0("--output=", out_dir),
       "--timec=default"
     )
     
@@ -41,14 +46,13 @@
 ##'
 ##' @returns returns table of diagnostic  metrics extracted from each receiver
 
-##' @examples
-##' \dontrun{
-##' # datapath below  must direct to actual files vrl/vdat files.  When data are uploaded by shiny, original file name is changed internally (i.e., 0.vrl, 1.vrl) and renamed file is in "name" column.
+##
+## # datapath below  must direct to actual files vrl/vdat files.  When data are uploaded by shiny, original file name is changed internally (i.e., 0.vrl, 1.vrl) and renamed file is in "name" column.
 # fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
-##' # process_table(fls = fls, action = "download", vdat_pth = glatosQAQC::check_vdat())
-##' }
-##'
+## # process_table(fls = fls, action = "download", vdat_pth = glatosQAQC::check_vdat())
+##
 ##' @export
+
 process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
   
  # extract vdat version used to extract data
@@ -66,6 +70,9 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
   #fwrite(fls, "~/Desktop/check.csv")
   # fls <- fread("~/Desktop/check.csv")
   #vdat_pth = glatosQAQC::check_vdat()
+  #fls <- list.files("E:\\GTJWF_vrl", full.names = TRUE)
+  #dta <- lapply(as.list(fls), .compile, vdat_pth = vdat_pth)
+  
   
   dta <- lapply(as.list(fls$datapath), .compile, vdat_pth = vdat_pth )
   foo <- lapply(dta, function(x){(fls[fls$datapath %in% x, ]$hash)})
@@ -166,8 +173,9 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
     i_tag <- data.table(file = NA_character_,
                         Time = as.POSIXct(NA, tz = "UTC"),
                         `Power Level` = NA_character_,
-                        `Delay` =  NA_character_,
-                        duration = NA_character_
+                        `Delay (s)` =  NA_character_,
+                        duration = NA_character_,
+                        `Full ID` = NA_character_
                         )
   }
 

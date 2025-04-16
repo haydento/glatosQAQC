@@ -1,5 +1,6 @@
 #' constructor function for data_source_file
-#' @export
+#' @param x for data_source_file
+#' @noRd
 
 #x <- file_id[5]
 
@@ -50,8 +51,10 @@ as.data_source_file <- function(x){
 
 
 ###############
-#' constructor function for data_source_file
-#' @export
+#' constructor function for detections
+#' @param x for detections
+#' @noRd
+
 
 as.det <- function(x){
   if(is.null(x[[1]])){
@@ -99,7 +102,9 @@ as.det <- function(x){
 
 ####################
 #' constructor function for cfg_channel
-#' @export
+#' @param x for cfg_channel
+#' @noRd
+
 as.cfg_channel <- function(x){
   if(is.null(x[[1]])){
     x <- data.table(`Map ID` = NA_character_,
@@ -147,7 +152,9 @@ as.cfg_channel <- function(x){
 }
 
 #' constructor function for clock_ref
-#' @export
+#' @param x for clock_ref
+#' @noRd
+
 
 as.clock_ref <- function(x){
   template <- data.table(`Time` = as.POSIXct(NA, tz = "UTC"),
@@ -207,7 +214,9 @@ as.clock_ref <- function(x){
 
 ###########
 #' constructor function for event_init
-#' @export
+#' @param x for init event
+#' @noRd
+
 
 as.event_init <- function(x){
   if(is.null(x[[1]])){
@@ -248,7 +257,8 @@ as.event_init <- function(x){
 
 ###############
 #' constructor function for event_offload
-#' @export
+#' @param x for event offload
+#' @noRd
 
 as.event_offload <- function(x){
 
@@ -297,7 +307,11 @@ as.event_offload <- function(x){
 }
 
 
-#' integrated tag constructor function
+###############
+#' constructor for transmitter config
+#' @param x for transmitter
+#' @noRd
+
 as.cfg_transmitter <- function(x){
 
   if(is.null(x[[1]]) ){
@@ -360,6 +374,3 @@ as.cfg_transmitter <- function(x){
                  class = c("cfg_transmitter", class(x)))
   return(x)
 }
-
-
-

@@ -1,8 +1,4 @@
-
-#' @title start receiver QAQC app
-#' @description Helper function that starts receiver download QAQC app.  This function does nothing else.
 #' @export
-
 QAQCapp <- function() {
   appDir <- system.file("shiny", "QAQCapp", package = "glatosQAQC")
   if (appDir == "") {

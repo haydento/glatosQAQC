@@ -38,7 +38,7 @@ ui <- fluidPage(
                    choices = list("Download" = "download",
                                   "Initialize" = "initialize"),
                    inline = TRUE),                 
-                 fileInput(inputId = "file1", label = "Choose vrl file",  multiple = TRUE, accept = c(".vdat", ".vrl")),
+                 fileInput(inputId = "file1", label = "Choose vrl or vdat file",  multiple = TRUE, accept = c(".vdat", ".vrl")),
                  downloadButton("downloadData", "Download")
                  
                  ),

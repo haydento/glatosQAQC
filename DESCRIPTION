@@ -1,14 +1,14 @@
 Package: glatosQAQC
 Type: Package
 Title: glatosQAQC shiny app to interactively check file validity of log files downloaded from Innovasea acoustic receivers
-Version: 0.5.0.0
-Date: 2024-10-03
+Version: 0.5.0.1
+Date: 2025-04-16
 Authors@R: 
     person(given = "Todd",
            family = "Hayden",
            role = c("aut", "cre"),
            email = "thayden@usgs.gov")
-Description: Shiny app that extracts and summarizes data from InnovaSea *.vrl files and presents a number of validity checks.
+Description: Shiny app that extracts and summarizes data from Innovasea *.vrl or *.vdat files and presents a number of validity checks.
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
@@ -17,12 +17,8 @@ RoxygenNote: 7.3.2
 Imports:
 	data.table (>= 1.14.0),
 	httr,
-	fasttime,
 	kableExtra,
-	lubridate,
 	shiny,
-	DT,
-	shinycssloaders,
 	openxlsx,
 	digest,
 	sys

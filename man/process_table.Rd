@@ -19,10 +19,3 @@ returns table of diagnostic  metrics extracted from each receiver
 \description{
 Compiles output data from all receiver log files, creates table used in output report
 }
-\examples{
-\dontrun{
-# datapath below  must direct to actual files vrl/vdat files.  When data are uploaded by shiny, original file name is changed internally (i.e., 0.vrl, 1.vrl) and renamed file is in "name" column.
-# process_table(fls = fls, action = "download", vdat_pth = glatosQAQC::check_vdat())
-}
-
-}

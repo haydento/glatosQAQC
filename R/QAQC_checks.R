@@ -1,9 +1,9 @@
 # Functions that identify suspect values obtained from extracted detection data
 
-#' @param out extracted data from VRL as created by running a process_table function - output only used in HTML report
 #' @details This function runs standard checks and colorcodes html output
-
+#' @param out extracted data from VRL as created by running a process_table function
 #' @export
+#' @noRd
 
 QAQC <- function(out){
 
@@ -45,8 +45,8 @@ QAQC <- function(out){
 #'
 #' @details identifies and colorcodes time differnce between computer and official internet time 
 #' @param input time-sync data generated from function
+#' @noRd
 
-#' @export
 
 # format output from clock
 clock_QAQC <- function(input){
@@ -60,8 +60,7 @@ clock_QAQC <- function(input){
 #' @details uses R package openxlsx to identify potential errors in vrl files and colorizes them using custom formatting in excel
 #' @param input output from "process table", runs checks and makes excel file
 #' @param output file path for excel worksheet
-#' 
-#' @export
+#' @noRd
 
 excel_QAQC <- function(input, output){
   

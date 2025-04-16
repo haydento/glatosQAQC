@@ -12,8 +12,7 @@ check_vdat(vdat_exe_path = NULL)
 of the system.}
 }
 \value{
-Character string with command for calling VDAT.exe via
-\code{system2}'s \code{\link{command}} argument.
+Character string with command for calling VDAT.exe
 }
 \description{
 Check path to Innovasea program VDAT.exe

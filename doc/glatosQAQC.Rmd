@@ -1,10 +1,8 @@
 ---
-title: "glatosQAQC"
-author: "Todd Hayden"
-date: "` r Sys.Date()`"
+title: "GlatosQAQC: A graphical tool for summarizing and verifying InnovaSea acoustic receiver log files"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{glatosQAQC}
+  %\VignetteIndexEntry{GlatosQAQC: A graphical tool for summarizing and verifying InnovaSea acoustic receiver log files}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -16,51 +14,126 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
-library(glatosQAQC)
-```
+# Background
 
-# How to use the glatosQAQC package to summarize Vemco receiver data
-files (*.vrl)
+Innovasea vrl files are the primary data file associated with acoustic
+receivers.  The successor to Innovasea *.vrl files are *.vdat files.
+Both are propriatary files that contain a host of operating and tag
+detection information and includes tag detections, receiver operating
+settings and schedule, receiver battery condition, errors associated
+with the receiver, time correction information, receiver memory, and
+many other settings.  Verifing the integrety of vrl and vdat files is
+an important step to make sure files are not corrupt and prevent data
+loss.
 
-Vemco vrl files are a proprietary file format that contains data from
-acoustic tag detections.  In addition to tag detections, the VRL file
-also contains data about receiver operating settings, receiver battery
-condition, errors associated with the receiver, time correction
-information, review available receiver memory, and many other
-settings.  Verifing the integrety of vrl files is an important step to
-make sure files are not corrupt and prevent loss of data.
-
-The glatosQAQC package provides a single R function that allows the
-user to interactively select vrl files for inclusion in the report.
-After vrl files are chosen, the function opens each vrl, extracts
-critical metrics from the file and creates a table that contains
-information for each receiver.  The generated report is output as an
-HTML file and csv file that may be opened in any web browser or
-spreadsheet software.
+The glatosQAQC package provides a single R function that allows an
+user to interactively select vrl or vdat files for inclusion and then
+generates a report that summarizes key operating and detection
+information extracted for each vrl submitted.  GlatosQAQC opens each
+vrl or vdat file, extracts critical metrics from the file, and creates
+a table.  The generated report is output as an HTML file that may be
+opened in any web browser or, optionally, output may be saved as a csv
+file.
 
 The function performs several basic checks of the data to identify
 potential errors or problems.  If any of these checks fail, the column
-associated with the error is highlighted in red.  Report also includes
+associated with the error is highlighted in red.  The report also includes
 information about time synchronization of computer clock and receiver
-clock.  Synchonization of computer clock is checked by comparing
-network time local computer time.  Table below describes information
-in report.
+clock.  Synchronization of computer clock is checked by comparing
+network time and local computer time, however this feature requires
+access to internet and will fail if internet access is not available.
 
-*(table- data dictionary needed here)
+# Basic use:
 
+```{r, eval = FALSE}
 
-*(table of checks performed are needed here!!)* 
-The report is created by running the \code{make_report} function.
-This function allows the user to identify the user directory and file
-name of output files.  Basic use of function is outlined below:
-
-\code{
-
+# load glatosQAQC package
 library(glatosQAQC)
 
-QAQCapp() 
- }
+# start app
+QAQCapp()
+```
+
+Running \code{QAQCapp} will open a local browser window with an action
+box at the top left side.  Within the box under the "Action" heading
+is a pair of selection buttons that allow the user to specify whether
+receiver log files submitted were obtained from recently recovered
+receivers or obtained from receivers that have recently undergone the
+initialization process in preparation for deployment.  Data management
+protocols used by researchers at Hammond Bay Biological Station
+require all receivers to be downloaded after initialization but prior
+to deployment to capture use-defined receiver settings.  If a user
+wishes to distinguish between download of receivers after
+"initialization" of receivers and prior to deployment from download of
+receivers after deployement, then selection of "Download" and
+"Initialize" options will add a column to the output to identify the
+purpose of the download.
+
+Files from downloaded receivers (*.vrl or *.vdat) can be selected for inclusion
+in the summary by pressing the "Browse" button under "Choose vrl or vdat file"
+heading.  Once the file selection box opens, the user navigates to the
+desired *.vrl or *.vdat files and selects one or many receivers by pressing
+control or shift while clicking on the files.  After desired files are
+selected, press "open" to create QAQC summary output as a table next
+to the file selection box.  \code{glatosQAQC} is designed to append
+results from multiple independent selection events to a single table
+that contains results from all receivers.  This feature allows the app
+to be opened on a computer at the beginning of the day and continue to
+be used incrementically as receivers are recovered and downloaded.
+All summary output are displayed in two tables that can be selected by
+clicking on either "rec data" or "computer time sync" tabs.
+
+# Output
+
+See table below for definition of receiver information summarized by
+glatosQAQC:
+
+
+| Column            | Description						     |	
+|:------------------|:---------------------------------------------------------------|
+|File Name	    |	Standard file ID					     |	
+|rec num	    |	Receiver serial number					     |	
+|rec mod	    |	Receiver model						     |
+|rec firmware	    | 	Receiver firmware ID					     |	
+|rec map	    |	Receiver map	  					     |
+|mem avail	    | 	Memory available for logging detections at time of download  |
+|rec init	    | 	Receiver clock time at initialization			     |
+|rec download	    | 	Receiver clock time at download				     |
+|comp download	    | 	Computer clock time at download				     |
+|first det	    | 	Time of first detection after initialization		     |
+|last det	    | 	Time of last detection before receiver download		     |
+|num det	    |	Number of detections   	      	       			     |
+|int tag init	    | 	Time of integrated tag initialization (VR2AR, VR2Tx only)    |
+|int tag ID	    |	Integrated tag ID (VR2AR, VR2Tx only) 	      	    	     |
+|int tag power	    |	Integrated tag broadcast power (VR2AR, VR2Tx only)	     |
+|int tag min delay  |	Integrated tag minimum delay (VR2AR, VR2Tx only)	     |		
+|int tag max delay  |	Integrated tag maximum delay (VR2AR, VR2Tx only)	     |
+|action	    	    |	Download or Initialize identifier    	   		     |
+|NIST time (lcl)    |	Server time (local timezone) obtained from internet	     |
+|computer time (lcl)| 	Time as reported by computer 	      	   		     |
+|time difference (s)| 	Time difference between server time and computer time	     |
+
+# Data error checks
+
+GlatosQAQC performs several checks for common issues and if found, highlights text in RED to notify user of potential issues.
+
+| Highlighted text      |Criteria      	      	     	    	   	      	      	     |  
+|:----------------------|:-------------------------------------------------------------------|
+|last det, rec download |Last detection not on same day as receiver download, no detections|
+|first det, rec init|First detection not on same day as receiver initialization| 
+|mem avail|Less than 10% of receier memory available|
+|time difference (s)|Computer clock is +- 2 seconds from internet time server|
+
+
+
+# Download
+
+Output from \code{glatosQAQC} can be downloaded by clicking on the
+Download button. This action opens a save dialog box that allows file
+to be saved at a user-specified location and name.
+
+
+
 
 
 

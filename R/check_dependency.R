@@ -4,8 +4,7 @@
 #'  (default) then the path to VDAT.exe must be in the PATH environment variable
 #'  of the system. 
 #'  
-#' @returns Character string with command for calling VDAT.exe via
-#'   \code{system2}'s \code{\link{command}} argument.
+#' @returns Character string with command for calling VDAT.exe
 #' 
 #' @examples 
 #' 

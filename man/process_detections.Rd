@@ -15,25 +15,6 @@ processed data frame
 \description{
 utility function that extracts and summarizes receiver download data needed to produce download report##'
 }
-\examples{
-
-# load example vrl
-vrl <- system.file("extdata/VR2W_109412_20190619_1.vrl", package = "glatosQAQC")
-
-# set system path to vdat utility 
-if(Sys.info()["sysname"] == "Linux") vpath <- system.file("exec/vdat_linux", package = "glatosQAQC")
-
-# compile vrl files
-df <- compile_vdats(vrl, vpath)
-
-# extract detections
-df <- extract_records(df, type = "DET")
-
-# process detections necessary for download report generation.
-out <- process_detections(df)
-
-
-}
 \author{
 Todd Hayden
 }
