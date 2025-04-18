@@ -4,12 +4,14 @@
 \alias{process_table}
 \title{Compiles output data from all receiver log files, creates table used in output report}
 \usage{
-process_table(fls, action, vdat_pth = glatosQAQC::check_vdat())
+process_table(fls, action, batt, vdat_pth = glatosQAQC::check_vdat())
 }
 \arguments{
 \item{fls}{data.frame of produced from shiny::fileInput that contains name, size, type, datapath for each receiver selected by user}
 
 \item{action}{User selected radio button for "download" and "initialize" included in output table}
+
+\item{batt}{User selected radio button for logging status of battery at time of report}
 
 \item{vdat_pth}{Path to vdat executable installed on your computer}
 }

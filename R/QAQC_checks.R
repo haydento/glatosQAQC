@@ -12,15 +12,21 @@ QAQC <- function(out){
  # out[, `int tag init` := format(`int tag init`, "%Y-%m-%d %H:%M:%S")]
   
   # prepare table to make html report
-  # change color of last detection when last detection in not on the same day as download time
+  # change color of last detection when last detection is
+  # not on the same day as download time
   # SOP is to test receiver immediately prior to download
   down_last_dtc_days <- as.Date(out$`rec download`) - as.Date(out$`last det`)
   
   # color last det and receiver download time red when last det is not on same day as receiver download or when there is a NA in last detection or when last det is NA
   # this check is based on SOP that says all receivers should be tested with sync tag immediately prior to download.
-  out$`last det` <- kableExtra::cell_spec(out$`last det`, "html", color = ifelse(down_last_dtc_days !=0 | is.na(down_last_dtc_days) | is.na(out$`last det`), "red", "black"))
+  out$`last det` <- kableExtra::cell_spec(out$`last det`, "html", 
+                                          color = ifelse(down_last_dtc_days != 0 # changed from != for testing
+                                                         | is.na(down_last_dtc_days) 
+                                                         | is.na(out$`last det`), "red", "black"))
 
-  out$`rec download` <- kableExtra::cell_spec(out$`rec download`, "html", color = ifelse(down_last_dtc_days != 0 | is.na(down_last_dtc_days), "red", "black"))
+  out$`rec download` <- kableExtra::cell_spec(out$`rec download`, "html", 
+                                              color = ifelse(down_last_dtc_days != 0 # changed from != for testing
+                                                             | is.na(down_last_dtc_days), "red", "black"))
 
   # color first det and receiver initialize time red when first det and receiver initialize time are not on the same day.
   # this check is based on SOP that says all receivers should be tested with syn tag immediately after initialization.
@@ -43,37 +49,49 @@ QAQC <- function(out){
 
 #' Checks time of computer clock by extracting true time from internet
 #'
-#' @details identifies and colorcodes time differnce between computer and official internet time 
+#' @details identifies and colorcodes time differnce between computer and 
+#' official internet time 
 #' @param input time-sync data generated from function
+#' @export
 #' @noRd
 
 
 # format output from clock
 clock_QAQC <- function(input){
-  tsync <- kableExtra::cell_spec(input, "html", color = ifelse(input >= 2 | is.na(input), "red", "black")) 
-  return(tsync)
+ if(as.numeric(input$value[3]) > 2){
+  
+  input$value[3] <- kableExtra::cell_spec(input$value[3], "html", color = "red")
+  input$field[3] <- kableExtra::cell_spec(input$field[3], "html", color = "red")
+ }  
+  return(input)
 }
 
 
 #' Colorcodes potential errors in excel output
 #'
-#' @details uses R package openxlsx to identify potential errors in vrl files and colorizes them using custom formatting in excel
+#' @details uses R package openxlsx to identify potential errors in vrl files 
+#' and colorizes them using custom formatting in excel
 #' @param input output from "process table", runs checks and makes excel file
 #' @param output file path for excel worksheet
+#' @export
 #' @noRd
 
 excel_QAQC <- function(input, output){
   
-  # bring in a list of worksheets (detections and metadata)
+  # bring in worksheets that need colored (detections and metadata)
   meta <- input$metadata
-
   out <- copy(input$detections)
   base_out = copy(input$detections)
-
+# browser()
+  
   # color 'last det' and 'receiver download time' when last detection is not of same day as receiver download or when there is a NA in last detection or when 'last det' is NA
   out[, down_last_dtc_days := as.Date(`rec download`) - as.Date(`last det`)]
-  out[, `last det` := fifelse(down_last_dtc_days !=0 | is.na(down_last_dtc_days) | is.na(out$`last det`), 1, 0)] 
-  out[, `rec download` := fifelse(down_last_dtc_days !=0 | is.na(down_last_dtc_days) | is.na(out$`last det`), 1, 0)]
+  out[, `last det` := fifelse(down_last_dtc_days != 0 | 
+                                is.na(down_last_dtc_days) | 
+                                is.na(out$`last det`), 1, 0)] # changed from != to == for testing
+  out[, `rec download` := fifelse(down_last_dtc_days != 0 | 
+                                    is.na(down_last_dtc_days) | 
+                                    is.na(out$`last det`), 1, 0)]
   #set(out, j = out$`last det`, value = as.numeric(out$`last det`))
 
 
@@ -114,10 +132,21 @@ excel_QAQC <- function(input, output){
                                      )
   
   openxlsx::addStyle(wb, sheet = "detections",
+                           style = red_style,
+                           rows = row_idx,
+                           cols = col_idx,
+                           stack = TRUE)
+
+  # color time difference > 2 seconds red
+  if(as.numeric(meta$value[3]) >= 2 | is.na(meta$value[3])){   
+  openxlsx::addStyle(wb, sheet = "metadata",
                      style = red_style,
-                     rows = row_idx,
-                     cols = col_idx,
-                     stack = TRUE)
+                     rows = 4,
+                     cols = c(1,2),
+                     stack = TRUE,
+                     gridExpand = TRUE)
+  }
+  
   openxlsx::writeData(wb, sheet = "detections", x = base_out)
   openxlsx::writeData(wb, sheet = "metadata", x = meta)
   openxlsx::saveWorkbook(wb, file = output, overwrite = TRUE, return = TRUE)

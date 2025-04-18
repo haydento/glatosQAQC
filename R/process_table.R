@@ -1,10 +1,11 @@
 # .compile function calls vdat utility to open each vrl, convert each file to an interleaved .csv files containing all the data stored on the receiver. Converts vrl to csv using Innovasea vdat command line utility.
 
 
-vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2W_109506_20210723_1.vrl"
-vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2AR_546310_20220624_1.vrl"
-vdat_pth <-  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
-out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
+#vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2W_109506_20210723_1.vrl"
+#vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2AR_546310_20220624_1.vrl"
+#vdat_pth <-  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
+#out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
+
 .compile <- function(vdata_file, vdat_pth){
     
     ## Convert function arguments
@@ -42,6 +43,7 @@ out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
 ##' 
 ##' @param fls data.frame of produced from shiny::fileInput that contains name, size, type, datapath for each receiver selected by user
 ##' @param action User selected radio button for "download" and "initialize" included in output table
+##' @param batt User selected radio button for logging status of battery at time of report
 ##' @param vdat_pth Path to vdat executable installed on your computer
 ##'
 ##' @returns returns table of diagnostic  metrics extracted from each receiver
@@ -53,20 +55,13 @@ out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
 ##
 ##' @export
 
-process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
+process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()){
   
- # extract vdat version used to extract data
-  # this is displayed in output
-  shell_out <- sys::exec_internal(cmd = vdat_pth, args = "--version")
-  vdat_ver <- rawToChar(shell_out$stdout)
-  vdat_ver <- unlist(strsplit(vdat_ver, "\r?\n"))
-  
-  # create key
+  # create keyl
   setDT(fls)  
   fls[, hash := digest::digest(datapath, serialize = FALSE), by = 1:nrow(fls)]
   fls[, pathname := basename(datapath)]
-  fls[, vdat_version := vdat_ver]
-
+  
   #fwrite(fls, "~/Desktop/check.csv")
   # fls <- fread("~/Desktop/check.csv")
   #vdat_pth = glatosQAQC::check_vdat()
@@ -77,12 +72,11 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
   dta <- lapply(as.list(fls$datapath), .compile, vdat_pth = vdat_pth )
   foo <- lapply(dta, function(x){(fls[fls$datapath %in% x, ]$hash)})
   names(dta) <- unlist(foo)
-
- # browser()
   dta <- lapply(dta, function(x) {gsub(pattern = "\\.(vrl|vdat)$", x = x, replacement = ".csv")})
-  
   dta <- lapply(dta, read_dta_lst)
-
+  
+    
+  
 #dta <- lapply(dta, glatos::read_vdat_csv)
   
   for(i in 1:length(dta)){
@@ -195,7 +189,6 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
                               "Full ID",
                               "Power Level",
                               "Map ID",
-                              "vdat_version",
                               "Serial Number",
                               "Model",
                               "Firmware Version",
@@ -213,7 +206,6 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
                          "int tag ID",
                          "int tag power",
                          "rec map",
-                         "vdat_ver",
                          "rec num",
                          "rec mod",
                          "rec firmware",
@@ -241,8 +233,7 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
                  "num det",
                  "int tag ID",
                  "int tag power",
-                 "int delay rng (s)",
-                 "vdat_ver"
+                 "int delay rng (s)"
                  )
              ]   
   
@@ -273,12 +264,18 @@ process_table <- function(fls, action, vdat_pth = glatosQAQC::check_vdat()){
 
   
 
-  # add in action type
+  # add in action type (initialization vs. download)
   if (action == "down"){
     out[, action := "download"]}
   if (action == "init"){
       out[, action := "initialize"]}
 
+  # add in battery replacement (new or not)
+  if (batt == "yes"){
+    out[, batt_action := "new"]}
+  if (batt == "no"){
+    out[, batt_action := "old"]}
+  
   return(out)
 }
 

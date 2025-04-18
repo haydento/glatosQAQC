@@ -112,6 +112,7 @@ glatosQAQC:
 |NIST time (lcl)    |	Server time (local timezone) obtained from internet	     |
 |computer time (lcl)| 	Time as reported by computer 	      	   		     |
 |time difference (s)| 	Time difference between server time and computer time	     |
+|batt_action	    |   Battery replaced or not identifier                           |	
 
 # Data error checks
 

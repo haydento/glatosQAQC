@@ -3,6 +3,8 @@
 export(QAQC)
 export(QAQCapp)
 export(check_vdat)
+export(clock_QAQC)
+export(excel_QAQC)
 export(get_local_vdat_version)
 export(process_detections)
 export(process_table)

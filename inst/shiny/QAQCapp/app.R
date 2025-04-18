@@ -37,9 +37,15 @@ ui <- fluidPage(
                    label = "action:",
                    choices = list("Download" = "download",
                                   "Initialize" = "initialize"),
-                   inline = TRUE),                 
-                 fileInput(inputId = "file1", label = "Choose vrl or vdat file",  multiple = TRUE, accept = c(".vdat", ".vrl")),
-                 downloadButton("downloadData", "Download")
+                   inline = TRUE),
+                 radioButtons(
+                   inputId = "battR",
+                   label = "battery replaced?",
+                   choices = list("Yes" = "yes",
+                                  "No" = "no"),
+                   inline = TRUE),
+                   fileInput(inputId = "file1", label = "Choose vrl or vdat file",  multiple = TRUE, accept = c(".vdat", ".vrl")),
+                   downloadButton("downloadData", "Download")
                  
                  ),
   
@@ -95,6 +101,7 @@ server <- function(input, output, session) {
 #output$data.table1 <- DT::renderDT({
   foo <-reactive({
     tst <- isolate(input$dtype)
+    tst1 <- isolate(input$battR)
     req(input$file1)
     olddf <- isolate(df_all())
     if(is.null(input$file1)) return(NULL)
@@ -102,7 +109,7 @@ server <- function(input, output, session) {
 #    print(glimpse(input$file1$name))
    # print(glimpse(input$file1))
 #    df <- glatosQAQC::process_table(fls = input$file1$datapath, nme = input$file1, action = tst, mrk_params = vdat_call, work_dir = tempdir())
-    df <- glatosQAQC::process_table(fls = input$file1, action = tst, vdat_pth = vdat_call)
+    df <- glatosQAQC::process_table(fls = input$file1, action = tst, batt = tst1, vdat_pth = vdat_call)
  #   print(glimpse(olddf))
     #  print(glimpse(df))
    # print(glimpse(input$file1))
@@ -132,7 +139,7 @@ server <- function(input, output, session) {
     rbind(time_compare(), metadata())
   })
   
-  output$clk <- DT::renderDT({clk()}, escape = FALSE, server = TRUE)
+  output$clk <- DT::renderDT({clock_QAQC(clk())}, escape = FALSE, server = TRUE)
 }
 
 shinyApp(ui, server)

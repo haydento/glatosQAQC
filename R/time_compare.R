@@ -16,12 +16,20 @@ time_compare <- function(){
   tsync <- abs(round(as.numeric(tnist) - as.numeric(tlocal), 2))
   #tsync <- kableExtra::cell_spec(tsync, "html", color = ifelse(tsync >= 2 | is.na(tsync), "red", "black")) 
 
+  # extract vdat version used to extract data
+  # this is displayed in metadata output- This value is consistent for all receivers
+  vdat_pth = glatosQAQC::check_vdat()  
+  shell_out <- sys::exec_internal(cmd = vdat_pth, args = "--version")
+  vdat_ver <- rawToChar(shell_out$stdout)
+  vdat_ver <- unlist(strsplit(vdat_ver, "\r?\n"))
 
-  out <- data.table(field = c("NIST time (lcl)", "computer time (lcl)", "time difference"), value = c(format(tnist, tz = "America/Detroit"), format(tlocal, tz = "America/Detroit"), tsync))  
+  out <- data.table(field = c("NIST time (lcl)", "computer time (lcl)", 
+                              "time difference (s)", "vdat version"), 
+                    value = c(format(tnist, tz = "America/Detroit"), 
+                              format(tlocal, tz = "America/Detroit"), 
+                              tsync,
+                              vdat_ver))  
   
-  #out <- data.table("NIST time (lcl)" = format(tnist, tz = "America/Detroit"), "computer time (lcl)" = format(tlocal, tz = "America/Detroit"), "time difference (s)" = tsync)
-  
-#  out <- list(tnist = tnist, tlocal = tlocal, tsync = tsync)
-
+    
   return(out)
 }
