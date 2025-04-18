@@ -17,8 +17,12 @@
       "--timec=default"
     )
     
+    
   #time_shell_out <- format(Sys.time(), "[%s]")
-  shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = FALSE)  
+  # shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = TRUE)  
+  
+  shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args)
+
   return(vdata_file)
 }
 
@@ -61,8 +65,8 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
   setDT(fls)  
   fls[, hash := digest::digest(datapath, serialize = FALSE), by = 1:nrow(fls)]
   fls[, pathname := basename(datapath)]
-  
-  #fwrite(fls, "~/Desktop/check.csv")
+
+      #fwrite(fls, "~/Desktop/check.csv")
   # fls <- fread("~/Desktop/check.csv")
   #vdat_pth = glatosQAQC::check_vdat()
   #fls <- list.files("E:\\GTJWF_vrl", full.names = TRUE)
@@ -70,12 +74,14 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
   
   
   dta <- lapply(as.list(fls$datapath), .compile, vdat_pth = vdat_pth )
+  
+    # browser()
+  
   foo <- lapply(dta, function(x){(fls[fls$datapath %in% x, ]$hash)})
   names(dta) <- unlist(foo)
   dta <- lapply(dta, function(x) {gsub(pattern = "\\.(vrl|vdat)$", x = x, replacement = ".csv")})
-  dta <- lapply(dta, read_dta_lst)
-  
-    
+
+    dta <- lapply(dta, read_dta_lst)
   
 #dta <- lapply(dta, glatos::read_vdat_csv)
   
