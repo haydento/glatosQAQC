@@ -14,14 +14,15 @@
       "--format=csv.fathom",
       vdata_file,
       #paste0("--output=", out_dir),
-      "--timec=default"
+      "--timec=default", "--progress"
     )
     
     
   #time_shell_out <- format(Sys.time(), "[%s]")
   # shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args, error = TRUE)  
   
-  shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args)
+  #shell_out <- sys::exec_internal(cmd = vdat_pth, args = vdat_args)
+  shell_out <- processx::run(command = vdat_pth, args = vdat_args, echo_cmd = TRUE, echo = TRUE)
 
   return(vdata_file)
 }
@@ -72,10 +73,17 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
   #fls <- list.files("E:\\GTJWF_vrl", full.names = TRUE)
   #dta <- lapply(as.list(fls), .compile, vdat_pth = vdat_pth)
   
-  
   dta <- lapply(as.list(fls$datapath), .compile, vdat_pth = vdat_pth )
+  #browser()
   
-    # browser()
+ # dta <- as.list(fls$datapath)
+  
+#  for(i in 1:length(dta)){
+ #     dta.i <- .compile(dta[[i]], vdat_pth = vdat_pth)
+#  }
+  
+ # browser()
+  
   
   foo <- lapply(dta, function(x){(fls[fls$datapath %in% x, ]$hash)})
   names(dta) <- unlist(foo)
