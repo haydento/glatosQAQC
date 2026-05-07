@@ -1,10 +1,10 @@
 # .compile function calls vdat utility to open each vrl, convert each file to an interleaved .csv files containing all the data stored on the receiver. Converts vrl to csv using Innovasea vdat command line utility.
 
 
-#vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2W_109506_20210723_1.vrl"
-#vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2AR_546310_20220624_1.vrl"
-#vdat_pth <-  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
-#out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
+ vdata_file <- "C:/Users/Admin/Desktop/test_vrl_2026/VR2AR-69 549958 2026-05-05 121951.vdat"
+ vdata_file <- "C:/Users/Admin/Desktop/test vrls/test vrls/VR2AR_546310_20220624_1.vrl"
+vdat_pth <-  "C:/Program Files/Innovasea/Fathom Connect/vdat.exe"
+out_dir <- "C:/Users/Admin/Desktop/test vrls/test vrls"
 
 .compile <- function(vdata_file, vdat_pth){
     
@@ -55,7 +55,7 @@
 
 ##
 ## # datapath below  must direct to actual files vrl/vdat files.  When data are uploaded by shiny, original file name is changed internally (i.e., 0.vrl, 1.vrl) and renamed file is in "name" column.
-# fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
+fls <- data.frame(name = c("0.vrl", "1.vrl"), size = c(10,10), type = c(NA, NA), datapath = c("C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/0.vrl", "C:\\Users\\Admin\\AppData\\Local\\Temp\\RtmpoBzcDm/d84e0d8bdfc118382467b5ad/1.vrl"))
 ## # process_table(fls = fls, action = "download", vdat_pth = glatosQAQC::check_vdat())
 ##
 ##' @export
@@ -144,20 +144,22 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
 
   
   if(nrow(i_tag) > 0){
+
     i_tag <- i_tag[!is.na(file),]
     setkey(i_tag, file, Time)    
-    i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"] 
 
-    #write.fst(i_tag, "~/Desktop/i_tag.fst")
-    #write.fst(out, "~/Desktop/out.fst")
-    #i_tag <- read.fst("~/Desktop/i_tag.fst", as.data.table = TRUE)
-    #out <- read.fst("~/Desktop/out.fst", as.data.table = TRUE)
+    # determine tag status (power) at precisely the time of initialization and download
+    i_tag2 <- i_tag
+    event <- out[!is.na(`comp init`), c("file", "comp init", "comp download")]
+    events2 <- data.table::melt(event, id.vars = "file", measure.vars = c("comp init", "comp download"), variable.name = "event", variable.factor = FALSE, value.name = "Time")
+    events2 <- i_tag2[events2, on = .(file, Time)]
+    i_tag2 <- data.table::dcast(events2, file ~ event, value.var = "Power Level" , drop = FALSE)
+    
+    i_tag[, end := data.table::shift(Time, fill = NA, type = "lead"), by = "file"] 
 
     # fill in missing i_tag events with download timestamp.  This occurs when i_tag is not adjusted prior to download. 
     i_tag[is.na(end), end := out[.SD, on = .(file), `comp download`]]
-    
-#    browser()
-    event <- out[!is.na(`comp init`), c("file", "comp init", "comp download")] 
+
     i_tag  <- event[i_tag, .(file,
                            end,
                            Time,
@@ -174,6 +176,8 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
     i_tag <- i_tag[, duration := difftime(end, Time, units = "secs")]
     i_tag <- i_tag[i_tag[, .I[duration == max(duration)], by = "file"]$V1, c("file", "Time", "Power Level", "Full ID", "duration", "Min Delay (s)", "Max Delay (s)")]
     
+    i_tag <- i_tag2[i_tag, .(file = i.file, Time = i.Time, `Power Level` = `i.Power Level`, `Min Delay (s)` = `i.Min Delay (s)`, `Max Delay (s)`, `Full ID` = `i.Full ID`, `int tag down` = `x.comp download`, `int tag init` = `x.comp init`), on = .(file)]
+    
     i_tag[, `Delay (s)` := paste(`Min Delay (s)`, `Max Delay (s)`, sep = "-")]
     i_tag[`Power Level` == "DISABLED", `Delay (s)` := NA]
 
@@ -183,12 +187,15 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
                         `Power Level` = NA_character_,
                         `Delay (s)` =  NA_character_,
                         duration = NA_character_,
-                        `Full ID` = NA_character_
+                        `Full ID` = NA_character_,
+                        `int tag down` = NA_character_,
+                        `int tag init` = NA_character_
                         )
   }
 
 
   out <- i_tag[out, on = .(file)] 
+  #out <- i_tag2[out, on = .(file)]
 
    #write.fst(i_tag, "~/Desktop/i_tag.fst")
     #fst::write.fst(out, "~/Desktop/out.fst")
@@ -216,7 +223,7 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
                          "last det",
                          "first tag",
                          "last tag",
-                         "int tag init",
+                         "int tag init time",
                          "int tag ID",
                          "int tag power",
                          "rec map",
@@ -247,7 +254,10 @@ process_table <- function(fls, action, batt, vdat_pth = glatosQAQC::check_vdat()
                  "num det",
                  "int tag ID",
                  "int tag power",
-                 "int delay rng (s)"
+                 "int delay rng (s)",
+                 "int tag down",
+                 "int tag init",
+                 "int tag init time"
                  )
              ]   
   

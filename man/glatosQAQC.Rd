@@ -11,4 +11,9 @@ Shiny app that extracts and summarizes data from Innovasea *.vrl or *.vdat files
 \author{
 \strong{Maintainer}: Todd Hayden \email{thayden@usgs.gov}
 
+Authors:
+\itemize{
+  \item Todd Hayden \email{thayden@usgs.gov}
+}
+
 }
