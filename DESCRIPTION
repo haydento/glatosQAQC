@@ -22,7 +22,8 @@ Imports:
 	digest,
 	sys,
 	DT,
-	shinycssloaders
+	shinycssloaders,
+	dplyr
 Depends: R (>= 4.0.0)
 LazyLoad: yes
 Suggests: 
